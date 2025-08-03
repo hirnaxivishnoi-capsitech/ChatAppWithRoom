@@ -1,42 +1,294 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+html, body, #root {
+  margin: auto;
+  padding: auto;
+  height: 100%;
+  width: 1400px;
+  max-width: 100%;
+  overflow-x: hidden;
+  /* background-color: #2D1A5B; */
+  /* color: black; */
+  /* scrollbar-color: transparent transparent; */
+scrollbar-width: none;
+
+}
+
+.page-container {
+  width: 100%;
+  height: 100vh;
+  /* background-color: #2D1A5B; */
+  /* color: white; */
+}
+
+.darkLevandar{
+    color: white;
+}
+
+.darkLevandarBg{
+    background-color: #2D1A5B;
+    color: white;
+}
+
+.lightLevandar{
+    color: white;
+}
+.lightLevandarBg{
+    background-color: #2D1A5B;
+    color: white;
+}
+
+.cursor{
+    cursor: pointer;
+}
+
+.fs-12{
+font-size: 12px;
+}
+
+.fs-14{
+font-size: 14px;
+}
+
+.fs-16{
+font-size: 16px;
+}
+
+.fs-18{
+font-size: 18px;
+}
+.fs-24{
+  font-size: 24px;
+  }
+  
+.fs-3em{
+    font-size: 3.2em;
+}
+.mt-4{
+    margin-top: 4px;
+  }
+.mt-8{
+    margin-top: 8px;
+}
+.mt-16{
+    margin-top: 16px;
+}
+.mt-24{
+    margin-top: 24px;
+}
+.mt-32{
+    margin-top: 32px;
+}
+.mt-64{
+    margin-top: 64px;
+}
+.mx-4{
+    margin:0px 4px 
+}
+
+.mx-8{
+    margin: 0px 8px;
+}
+
+.my-16{
+    margin: 16px 0px;
+}
+.my-16{
+    margin: 16px 0px;
+}
+.my-24{
+    margin: 24px 0px;
+}
+.my-32{
+  margin: 32px 0px;
+}
+.mr-8{
+    margin-right: 8px;
+}
+.mr-16{
+    margin-right: 16px;
+}
+.p-8{
+    padding: 8px ;
+}
+.p-16{
+    padding: 16px ;
+}
+
+.px-4{
+    padding: 0px 4px;
+}
+
+.px-8{
+    padding: 0px 8px;
+}
+
+.px-16{
+    padding: 0px 16px;
+}
+
+.w-25{
+    width: 25%;
+}
+.w-50{
+    width: 50%;
+}
+
+.w-75{
+    width: 75%;
+}
+
+.btn{
+  background-color: #2D1A5B; 
+  border: 2px solid #2D1A5B;
+  padding: 5px 5px;
   text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 8px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+
+
+.button1:hover{
+  color: #2D1A5B; 
+  background-color: white; 
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.button1 {
+  color: white;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.btn-dark {
+  /* background-color: white; */
+  background-color: #2D1A5B; 
+  color: white;
+  /* border: 2px solid transparent; */
 }
 
-.card {
-  padding: 2em;
+.btn-dark:hover {
+ background-color: white; 
+  border: 2px solid #2D1A5B;
+  color: #2D1A5B;
 }
 
-.read-the-docs {
-  color: #888;
+.btn-light {
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-light:hover {
+  background-color: white; 
+  color: #2D1A5B;
+  border: 2px solid white;
+}
+
+.text-center{
+    text-align: center;
+}
+.d-flex{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.d-flexNoGap{
+   display: flex;
+  flex-direction: row;
+  gap:50px
+}
+
+.d-center{
+  display: flex;
+  align-items: center;
+}
+
+.logo{
+  object-fit: contain;
+  /* height: auto; */
+  width: 150px;
+}
+
+
+.text-gradient-animate {
+font-size: 3rem;
+font-weight: bold;
+background: linear-gradient(
+  270deg,
+  #b3b3ff,
+  #9999ff,
+  #7f7fff,
+  #6658a8,
+  #2d1a5b
+);
+background-size: 300% 300%;
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+animation: gradientMove 5s ease infinite;
+}
+
+@keyframes gradientMove {
+0% {
+  background-position: 0% 50%;
+}
+50% {
+  background-position: 100% 50%;
+}
+100% {
+  background-position: 0% 50%;
+}
+}
+
+.logo-marquee {
+overflow: hidden;
+white-space: nowrap;
+box-sizing: border-box;
+width: 100%;
+padding: 50px 0;
+
+}
+
+.logo-track {
+display: inline-block;
+animation: moveLeft 30s linear infinite;
+}
+
+.logo-track img {
+height: 60px;
+margin: 0 40px;
+vertical-align: middle;
+}
+
+@keyframes moveLeft {
+0% {
+  transform: translateX(0%);
+}
+100% {
+  transform: translateX(-50%);
+}
+}
+
+/* .banner-container {
+width: 100%;
+overflow-x: hidden;
+}
+
+.banner-image {
+  width: 100%;
+height: auto;
+} */
+
+.equal-height-card {
+height: 100%;
+display: flex;
+}
+
+.custom-card {
+flex-grow: 1;
+width: 100%;
+border-radius: 12px;
+box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+background-color: #f9f9f9;
+min-height: 180px; /* Adjust this value if needed */
 }
