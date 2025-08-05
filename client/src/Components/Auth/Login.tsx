@@ -13,12 +13,11 @@ const Login = () => {
   const navigate = useNavigate();
   const Id = localStorage.getItem("Id");
   const jwtToken = localStorage.getItem("jwtToken");
-  const isEmployer = window.location.pathname.includes("employer");
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (Id && jwtToken) {
-      navigate(isEmployer ? "/dashboard" : "/candidate/profile");
+      navigate("/dashboard" );
     }
   }, []);
 
