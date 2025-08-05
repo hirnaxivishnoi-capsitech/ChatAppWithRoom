@@ -1,0 +1,52 @@
+/* register.css */
+
+.register-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.register-card {
+  width: 900px;
+  height: auto;
+  padding: 20px;
+  background-color: #f2f2fd;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.register-title {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  color: #2d1a5b;
+  font-weight: 500;
+}
+
+.register-icon {
+  font-size: 20px;
+}
+
+.register-signin-text {
+  margin: 0;
+}
+
+.register-footer {
+  color: #2d1a5b;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.register-footer-link {
+  text-decoration: underline;
+  margin-left: 5px;
+}
+
+.register-button {
+  background-color: #2d1a5b;
+  border-color: #2d1a5b;
+  width: 100%;
+}

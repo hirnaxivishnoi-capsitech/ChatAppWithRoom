@@ -271,7 +271,7 @@ const LandingPage = () => {
           <Col key={index} xs={12} sm={8} md={6} lg={4}>
             <div
               style={{
-                backgroundColor: feature.bg,
+                // backgroundColor: feature.bg,
                 padding: "2rem",
                 borderRadius: "20px",
                 textAlign: "center",

@@ -18,9 +18,11 @@ scrollbar-width: none;
   /* background-color: #2D1A5B; */
   /* color: white; */
 }
-
+.gray{
+  color: rgb(180, 179, 179);
+}
 .darkLevandar{
-    color: white;
+    color: #2D1A5B;
 }
 
 .darkLevandarBg{
