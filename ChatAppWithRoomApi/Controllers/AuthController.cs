@@ -19,9 +19,9 @@ namespace ChatAppWithRoomApi.Controllers
             _authService = authService;
         }
 
-        [HttpPost("Login")]
+        [HttpPost("login")]
 
-        public async Task<ApiResponse<AuthResponse>> GetAsyncByPassword(Login loginUser)
+        public async Task<ApiResponse<AuthResponse>> login(Login loginUser)
         {
             var res = new ApiResponse<AuthResponse>();
             try
@@ -32,6 +32,7 @@ namespace ChatAppWithRoomApi.Controllers
                     var token = _authService.generateJWTToken(user);
                     res.Result = new AuthResponse { Email = user.Email, Token = token , Name = user.Name , Id = user.Id };
                     res.Message = "Login Successful";
+                    return res;
                 }
                 res.Status = false;
                 res.Message = "Login Failed";

@@ -1,0 +1,52 @@
+.ryzo-room-modal .room-type-toggle {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  /* padding-top: 10px; */
+}
+
+.room-type-option {
+  flex: 1;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background-color: #f7f7f7;
+}
+
+.room-type-option .publicIcon {
+  font-size: 22px;
+  color: #1677ff;
+}
+.room-type-option .privateIcon {
+  font-size: 22px;
+  color: #db0533;
+}
+
+.room-type-option.activePublic {
+  background-color: #e6f4ff;
+  border: 2px solid #1677ff;
+  box-shadow: 0px 4px 12px rgba(22, 119, 255, 0.2);
+}
+
+.room-type-option.activePublic {
+  background-color: #e6f4ff;
+  border: 2px solid #1677ff;
+  box-shadow: 0px 4px 12px rgba(22, 119, 255, 0.2);
+}
+
+.room-type-option.activePrivate {
+  background-color: #FEF2F2;
+  border: 2px solid #db0533;
+  box-shadow: 0px 4px 12px rgba(241, 71, 108, 0.2);
+}
+.room-type-option.activePrivate {
+  background-color: #FEF2F2;
+  border: 2px solid #db0533;
+  box-shadow: 0px 4px 12px rgba(241, 71, 108, 0.2);
+}

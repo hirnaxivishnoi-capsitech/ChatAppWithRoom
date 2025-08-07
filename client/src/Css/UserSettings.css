@@ -1,0 +1,24 @@
+.user-settings-layout {
+  background: #f0f2f5;
+}
+
+.settings-sider {
+  background: #fff;
+  border-right: 1px solid #e5e5e5;
+}
+
+.settings-content {
+  padding: 0px 40px 10px 40px;
+  background: #fff;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}

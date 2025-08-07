@@ -1,3 +1,4 @@
+using ChatAppWithRoomApi.Hubs;
 using ChatAppWithRoomApi.Models;
 using ChatAppWithRoomApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -67,7 +68,25 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddAuthorization();
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173") // <-- your frontend
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
+});
+
+builder.Services.AddSignalR(); // Add SignalR service
+
 var app = builder.Build();
+
+app.MapHub<ChatHub>("/chatHub"); // Map the Hub - This is where your frontend will connect
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -76,12 +95,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();

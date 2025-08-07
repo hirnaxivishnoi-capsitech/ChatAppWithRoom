@@ -42,7 +42,24 @@ namespace ChatAppWithRoomApi.Services
 
         public async Task<User> GetUserByEmailAndPassword(string email, string password)
         {
-            return  await _userCollection.Find(x => x.Email == email && x.PasswordHash == password).FirstOrDefaultAsync();
+            var user =   await _userCollection.Find(x => x.Email == email).FirstOrDefaultAsync();
+
+            if (user is null)
+            {
+                throw new Exception("No user found");
+            }
+            var Verify = BCrypt.Net.BCrypt.EnhancedVerify(password, user.PasswordHash);
+
+            if (Verify)
+            {
+
+                return user;
+            }
+            else
+            {
+                throw new Exception("User name or Password is incorrect ");
+            }
+
         }
 
         public async Task<User> GetUserIfExistAysnc(string email, string name)

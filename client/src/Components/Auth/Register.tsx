@@ -9,6 +9,8 @@ import {
 } from "@ant-design/icons";
 import Header from "../Header";
 import "../../Css/Register.css"; // ✅ Add your stylesheet
+import { useRegister } from "../../Services/RegisterService";
+import bcrypt from "bcryptjs";
 
 const { Title, Text } = Typography;
 
@@ -17,37 +19,29 @@ const formItemLayout = {
   wrapperCol: { xs: { span: 24 }, sm: { span: 16 } },
 };
 
-const tailFormItemLayout = {
-  wrapperCol: { xs: { span: 24, offset: 0 }, sm: { span: 16, offset: 8 } },
-};
-
 const Register = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const isEmployer = window.location.pathname.includes("employer");
+  const {mutate: registerMutate} = useRegister();
 
-  //   const onFinish = async (values: any) => {
-  //     // const hashedPassword = bcrypt.hashSync(
-  //     //   values.password,
-  //     //   "$2b$13$jtClg6Qdy2xn7Oer8FH3m."
-  //     // );
-  //     try {
-  //         await UnauthCallPostApi(urls?.auth?.register, {
-  //           ...values,
-  //           password: hashedPassword,
-  //           role: isEmployer ? "EMPLOYER" : "CANDIDATE",
-  //         });
-  //         navigate(isEmployer ?"/employer/login" : "/candidate/login");
-  //     } catch (error: any) {
-  //       if (error.response?.status === 409) {
-  //         alert(error.response.data.message || "User already exists.");
-  //       } else {
-  //         console.error("Error:", error);
-  //         alert("Something went wrong during sign up.");
-  //       }
-  //       // form.resetFields();
-  //     }
-  //   };
+    const onFinish = async (values: any) => {
+      // const hashedPassword = bcrypt.hashSync(
+      //   values.password,
+      //   "$2b$13$jtClg6Qdy2xn7Oer8FH3m."
+      // );
+      
+      try {
+          await registerMutate( values);
+      } catch (error: any) {
+        if (error.response?.status === 409) {
+          alert(error.response.data.message || "User already exists.");
+        } else {
+          console.error("Error:", error);
+          alert("Something went wrong during sign up.");
+        }
+        // form.resetFields();
+      }
+    };
 
   return (
     <>
@@ -90,6 +84,7 @@ const Register = () => {
                 layout="vertical"
                 style={{ marginTop: 30 }}
                 autoComplete="off"
+                onFinish={onFinish}
                 // onFinishFailed={onFinishFailed}
               >
                 <Form.Item
@@ -124,7 +119,7 @@ const Register = () => {
                   />
                 </Form.Item>
 
-                <Form.Item
+                {/* <Form.Item
                   name="confirm"
                   label="Confirm Password"
                   dependencies={["password"]}
@@ -154,7 +149,7 @@ const Register = () => {
                     placeholder="Confirm your password"
                     className="gray"
                   />
-                </Form.Item>
+                </Form.Item> */}
 
                 <Form.Item
                   name="name"

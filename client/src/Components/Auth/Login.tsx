@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
-import { Button, Form, Input, Card, Typography } from "antd";
+import { Button, Form, Input, Card, Typography, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
   LockOutlined,
   MailOutlined,
 } from "@ant-design/icons";
 import Header from "../Header";
+import { useLogin } from "../../Services/loginService";
 
 const { Title, Text } = Typography;
 
@@ -14,16 +15,24 @@ const Login = () => {
   const Id = localStorage.getItem("Id");
   const jwtToken = localStorage.getItem("jwtToken");
   const [form] = Form.useForm();
+  const {mutate: loginMutate} = useLogin();
 
   useEffect(() => {
     if (Id && jwtToken) {
-      navigate("/dashboard" );
+      navigate("/ryzo/" );
     }
   }, []);
 
-  const onFinishFailed = (errorInfo: any) => {
-    console.log("Login Failed:", errorInfo);
-  };
+  const onFinish = (values: any) => {
+    try {
+      loginMutate(values)
+      form.resetFields();
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  }
+
+  
 
   return (
     <>
@@ -51,8 +60,8 @@ const Login = () => {
                 layout="vertical"
                 style={{ marginTop: 30 }}
                 autoComplete="off"
-                onFinishFailed={onFinishFailed}
-                // onFinish={onFinish} 
+                // onFinishFailed={onFinishFailed}
+                onFinish={onFinish} 
               >
                 <Form.Item
                   label="Email"
