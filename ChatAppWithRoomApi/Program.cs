@@ -14,7 +14,8 @@ builder.Services.Configure<DatabaseSetting>(
 // Add services to the container.
 builder.Services.AddSingleton<AuthService>();
 builder.Services.AddSingleton<UserService>();
-
+builder.Services.AddSingleton<RoomServices>();
+builder.Services.AddSingleton<MessageService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

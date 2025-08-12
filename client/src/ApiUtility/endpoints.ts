@@ -1,4 +1,3 @@
-
 const BASE_URL = import.meta.env.REACT_APP_BASE_URL || "https://localhost:7004/api";
 
 export const endpoints = {
@@ -7,6 +6,18 @@ export const endpoints = {
     register: `${BASE_URL}/Auth/register`,
   },
   users: {
-//    other user-related endpoints can be added here
+
   },
+  rooms :{
+    createRoom: `${BASE_URL}/Room/CreateRoom`,
+    getAllRooms : `${BASE_URL}/Room/GetAllRooms`,
+    getYourRooms : `${BASE_URL}/Room/GetYourRooms`,
+    getAvaliableRooms : `${BASE_URL}/Room/GetAvaliableRooms`,
+    joinRoom: `${BASE_URL}/Room/JoinRoom`,
+    deleteRoom:`${BASE_URL}/Room/DeleteRoom`,
+  },
+  message:{
+    createMessage:`${BASE_URL}/Message/CreateMessage`,
+    getMessagesByRoomId:`${BASE_URL}/Message/GetMessagesByRoomId`,
+  }
 };

@@ -50,10 +50,11 @@ const Login = () => {
           <div style={{ display: "flex", flexWrap: "wrap" }}>
             {/* Left Section - Form */}
             <div style={{ flex: 1, padding: "40px 32px" }}>
-              <Title level={3} style={{ color: "#2D1A5B", marginBottom: 0 }} className="d-center">
-                <img  src="https://cdn-icons-png.flaticon.com/128/295/295128.png" className="px-8" width={40}/> Welcome Back
+              <Title level={3} style={{ color: "#2D1A5B", marginBottom: 0 }} >
+                {/* <img  src="https://cdn-icons-png.flaticon.com/128/295/295128.png" className="px-8" width={40}/> */}
+                 Welcome Back To Your  Dashboard
               </Title>
-              <Text type="secondary" className="px-8 mt-8" >Login to your Ryzo account</Text>
+              <Text type="secondary" className="mt-8" >Login to your Ryzo account</Text>
 
               <Form
                 form={form}
@@ -131,7 +132,7 @@ const Login = () => {
               }}
             >
               <img
-                src="loginImg.png"
+                src="5516.png"
                 alt="Login Illustration"
                 style={{ width: "100%" }}
               />

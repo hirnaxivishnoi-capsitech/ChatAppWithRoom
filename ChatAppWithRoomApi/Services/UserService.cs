@@ -40,6 +40,11 @@ namespace ChatAppWithRoomApi.Services
             return user;
         }
 
+        public async Task<List<User>> GetAllUser()
+        {
+            return await _userCollection.Find(_ => true).ToListAsync();
+        }
+
         public async Task<User> GetUserByEmailAndPassword(string email, string password)
         {
             var user =   await _userCollection.Find(x => x.Email == email).FirstOrDefaultAsync();

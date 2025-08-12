@@ -1,19 +1,35 @@
-import { Avatar, Button, Input } from "antd";
+import { Avatar, Button, Input, Upload } from "antd";
 import React, { useEffect, useState } from "react";
-// import connection from "../../SignalRConnection/signalrConnection";
 import * as signalR from "@microsoft/signalr";
-import { SendOutlined } from "@ant-design/icons";
+import {
+  LogoutOutlined,
+  SendOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { userData } from "../../store/authSlice";
-import CreateNJoinRoom from "./CreateNJoinRoom";
+// import { useGetMessagesByRoomId } from "../../Services/MessageService";
 
-const ChatCompent = () => {
-  const selector = useSelector(userData);
+const ChatCompent = (selectedRoom: any) => {
+  const userInfo = useSelector(userData);
+  // const { data } = useGetMessagesByRoomId(selectedRoom?.room?.id);
   const [connection, setConnection] = useState<signalR.HubConnection | null>(
     null
   );
   const [messages, setMessages] = useState("");
-  const [chat, setChat] = useState<{ user: string; message: string }[]>([]);
+  const [chat, setChat] = useState<
+    {
+      userName: any;
+      user: string;
+      message: string;
+    }[]
+  >([]);
+  const [typingUser, setTypingUser] = useState<string | null>(null);
+  const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
@@ -25,84 +41,248 @@ const ChatCompent = () => {
   }, []);
 
   useEffect(() => {
-    if (connection) {
-      connection
-        .start()
-        .then(() => {
-          console.log("Connected to SignalR!");
-          connection.on("ReceiveMessage", (user, message) => {
-            setChat((prevChat) => [...prevChat, { user, message }]);
-          });
-        })
-        .catch((err: any) => console.error("Connection error: ", err));
+    const startConnection = async () => {
+      if (!connection) return;
+      try {
+        await connection.start();
+        joinRoom();
+        console.log("Connected to SignalR!");
+      } catch (err: any) {
+        console.error("Connection error: ", err);
+      }
+    };
 
-      return () => {
+    startConnection();
+
+    return () => {
+      if (connection) {
         connection.stop();
-      };
-    }
+      }
+    };
   }, [connection]);
 
-  const sendMessage = async () => {
-    if (messages.trim() && connection) {
-      await connection.invoke("SendMessage", selector?.name, messages);
-      setMessages("");
+  const joinRoom = () => {
+    if (connection?.state === "Connected" && selectedRoom?.room?.id) {
+      connection.invoke("JoinRoom", selectedRoom?.room?.id, userInfo?.id);
+      connection.on("UserTyping", ( userName: string) => {
+        
+        if (userName !== userInfo?.name  ) {
+            setTypingUser(userName);
+            setTimeout(() => setTypingUser(null), 2000);
+        }
+        console.log(`${userName} is typing...`);
+      });
+      connection.on("LoadHistory", (historyMessages: any[]) => {
+        const formatted = historyMessages.map((m) => ({
+          user: m.senderId.id,
+          userName: m.senderId?.name,
+          message: m.content,
+          createdAt: m.createdAt,
+        }));
+        setChat(formatted);
+      });
+      connection.on(
+        "ReceiveMessage",
+        (roomId, userId, userName, message, createdAt) => {
+          if (roomId === selectedRoom?.room?.id) {
+            setChat((prevChat) => [
+              ...prevChat,
+              {
+                roomId: roomId,
+                user: userId,
+                userName: userName,
+                message: message.content,
+                createdAt: createdAt,
+              },
+            ]);
+          }
+        }
+      );
     }
   };
 
+  useEffect(() => {
+    if (!connection || !selectedRoom?.room?.id) return;
+
+    joinRoom();
+
+    return () => {
+      connection.off("UserTyping");
+      connection.off("ReceiveMessage");
+      connection.off("LoadHistory");
+    };
+  }, [selectedRoom?.room?.id, connection]);
+
+  const sendMessage = async () => {
+    if (
+      !selectedRoom?.room?.id ||
+      !selectedRoom?.room?.name ||
+      !userInfo?.id ||
+      !userInfo?.name
+    ) {
+      console.error("Missing required data for sending message");
+      return;
+    }
+    if (messages.trim() && connection) {
+      await connection.invoke(
+        "SendMessage",
+        selectedRoom?.room?.id,
+        selectedRoom?.room?.name,
+        userInfo?.id,
+        userInfo?.name,
+        messages
+      );
+
+      setMessages("");
+    }
+  };
+  // const allMessages = [
+  //   ...(data || []).map(
+  //     (m: {
+  //       id: any;
+  //       senderId: any;
+  //       senderName: any;
+  //       content: any;
+  //       createdAt: any;
+  //     }) => ({
+  //       id: m.id,
+  //       user: m.senderId,
+  //       userName: m.senderName,
+  //       message: m.content,
+  //       createdAt: m.createdAt,
+  //     })
+  //   ),
+  //   ...chat,
+  // ];
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chat]);
+
+  const handleKeyDown = (event: any) => {
+    if (event.key === "Enter") {
+      sendMessage();
+    }
+  };
+
+ 
+
   return (
-    <div>
-      {chat.map((msg, index) => (
+    <div style={{ width: "100%" }}>
+      {chat?.map((msg: any, index: any) => (
         <div
           key={index}
-          className="darkLevandar"
           style={{
+            display: "flex",
+            justifyContent:
+              msg?.user === userInfo?.id ? "flex-end" : "flex-start",
             marginBottom: "10px",
-            backgroundColor: "white",
-            padding: "10px 12px 20px 10px",
-            border: "1px solid #ccc",
-            borderRadius: "6px",
-            
           }}
         >
-          <p className="d-center ">
+          {userInfo?.id !== msg?.user && (
             <Avatar className="mr-8 darkLevandarBg">
-              {msg.user.charAt(0).toUpperCase()}
+              {msg?.userName?.charAt(0).toUpperCase()}
             </Avatar>
-            - {msg.message}
-          </p>
-          <small style={{ float: "right", fontSize: "10px", color: "#888" }}>
-            {new Date().toLocaleTimeString()}
-          </small>
+          )}
+          <div
+            style={{
+              backgroundColor:
+                msg?.user === userInfo?.id ? "#E9EEFD" : "#ebebebff",
+              padding: "5px 12px 5px 10px",
+              border: "1px solid #ccc",
+              borderRadius: "6px",
+            }}
+          >
+            <div>
+              {userInfo?.id !== msg?.user && (
+                <div className="darkLevandar" style={{ fontWeight: 500 }}>
+                  {msg?.userName}
+                </div>
+              )}
+              <span className="mr-8">{msg?.message}</span>
+
+              <small
+                className="mt-12"
+                style={{ float: "right", fontSize: "10px", color: "#888" }}
+              >
+                {new Date(msg?.createdAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </small>
+            </div>
+          </div>
         </div>
       ))}
-      {/* <Input
-        placeholder="Enter your name"
-        style={{
-          width: "300px",
-          marginBottom: "10px",
-          border: "1px solid black",
-        }}
-        value={user}
-        onChange={(e) => setUser(e.target.value)}
-      /> */}
+
+      {typingUser && (
+        <div className="fs-12" style={{ position: "absolute", bottom: "70px" }}>
+          {typingUser} is typing...
+        </div>
+      )}
+      <div ref={messagesEndRef} className="mb-64" />
+
       <div
         className="d-flex"
         style={{
-          width: "960px",
-          paddingTop: "420px",
+          width: "75%",
           position: "fixed",
           bottom: 10,
         }}
       >
+        <Upload
+          showUploadList={false}
+          beforeUpload={() => {
+            return false;
+          }}
+        >
+          <Button icon={<UploadOutlined />} className="mr-16 mt-12"></Button>
+        </Upload>
         <Input.TextArea
           placeholder="Type your message..."
           autoSize={{ minRows: 2, maxRows: 4 }}
           style={{ borderRadius: 8, borderColor: "gray" }}
           className="mr-16"
           value={messages}
-          onChange={(e) => setMessages(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onChange={(e) => {
+            setMessages(e.target.value);
+            if (connection) {
+              connection.invoke(
+                "Typing",
+                selectedRoom?.room?.id,
+                userInfo?.name
+              );
+            }
+          }}
         />
-        <SendOutlined onClick={sendMessage} style={{ fontSize: "20px" }} className="mr-16" />
+        <div>
+          <LogoutOutlined
+            style={{ fontSize: "20px" }}
+            className="mr-16 mt-16"
+            onClick={async () => {
+              if (
+                connection?.state === "Connected" &&
+                selectedRoom.room.id &&
+                userInfo?.id
+              ) {
+                await connection?.invoke(
+                  "LeaveRoom",
+                  selectedRoom.room.id,
+                  userInfo?.id
+                );
+                window.location.reload();
+              } else {
+                console.log("Some error onleaving room");
+              }
+            }}
+          />
+        </div>
+        <SendOutlined
+          onClick={sendMessage}
+          style={{ fontSize: "20px" }}
+          className="mr-16"
+        />
       </div>
     </div>
   );

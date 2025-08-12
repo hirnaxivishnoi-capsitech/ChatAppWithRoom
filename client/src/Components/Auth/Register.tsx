@@ -205,7 +205,7 @@ const Register = () => {
 
             >
               <img
-                src="loginImg.png"
+                src="5516.png"
                 alt="Login Illustration"
                 style={{ width: "100%", maxWidth: "400px" }}
               />

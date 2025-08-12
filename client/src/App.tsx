@@ -1,14 +1,12 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { ConfigProvider } from "antd";
 import LandingPage from "./Components/LandingPage";
-import NotFound from "./Components/NotFound";
 import Login from "./Components/Auth/Login";
 import Register from "./Components/Auth/Register";
 import MainLayout from "./Components/Dashboard/MainLayout";
 import { useSelector } from "react-redux";
 import { token } from "./store/authSlice";
-import ChatComponent from "./Components/ChatComponents/ChatCompent";
 
 function App() {
   const isAuthenticated = useSelector(token);
@@ -28,18 +26,18 @@ function App() {
         <Routes>
           {isAuthenticated ? (
             <>
-            <Route path="/ryzo/*" element={<MainLayout />} />
-            <Route path="/chatHub" element={<ChatComponent />} />
+            <Route path="/ryzo" element={<MainLayout />} />
+              <Route path="*" element={<Navigate to='/ryzo' />} />
+              <Route path="/" element={<LandingPage />} />
             </>
           ) : (
             <>
-              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/Register" element={<Register />} />
+              <Route path="*" element={<LandingPage />} />
             </>
           )}
 
-          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </ConfigProvider>

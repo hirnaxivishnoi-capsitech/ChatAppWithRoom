@@ -17,6 +17,8 @@
     "antd": "^5.26.7",
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
+    "dayjs": "^1.11.13",
+    "emoji-picker-react": "^4.13.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-redux": "^9.2.0",
