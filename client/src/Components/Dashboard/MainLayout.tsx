@@ -8,13 +8,15 @@ import {
   Divider,
   Dropdown,
   Empty,
+  notification,
+  Row,
+  Col,
 } from "antd";
 import {
   LockOutlined,
   MoreOutlined,
   LogoutOutlined,
   UnlockOutlined,
-  DeleteOutlined,
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { userData } from "../../store/authSlice";
@@ -22,12 +24,11 @@ import ChatCompent from "../ChatComponents/ChatCompent";
 import CreateNJoinRoom from "../ChatComponents/CreateNJoinRoom";
 import UserSettings from "./UserSettings";
 import {
-  useDeleteRoom,
-  useGetAllRoom,
   useGetAvaliableRoom,
   useGetYourRoom,
 } from "../../Services/RoomService";
 import PreviewRoomModal from "../ChatComponents/PreviewRoomModal";
+import * as signalR from "@microsoft/signalr";
 
 const { Sider, Content, Header } = Layout;
 const { Text, Title } = Typography;
@@ -35,16 +36,22 @@ const { Text, Title } = Typography;
 const SidebarLayout: React.FC = () => {
   const [searchRoom, setSearchRoom] = useState<string | undefined>();
   const userInfo = useSelector(userData);
-  const { data: YourRooms, isLoading, isError } = useGetYourRoom(userInfo?.id);
-  const { data: AvailableRooms } = useGetAvaliableRoom(userInfo?.id);
-  const { data: FilterRooms } = useGetAllRoom(searchRoom);
-  const { mutate } = useDeleteRoom(userInfo?.id);
+  const {
+    data: YourRooms,
+    isLoading,
+    isError,
+  } = useGetYourRoom(userInfo?.id, searchRoom);
+  const { data: AvailableRooms } = useGetAvaliableRoom(
+    userInfo?.id,
+    searchRoom
+  );
   const [selectedRoom, setSelectedRoom] = useState<any>(null);
   const [selectedAvailableRoom, setselectedAvailableRoom] = useState<any>(null);
   const [previewModal, setPreviewModal] = useState<boolean>(false);
-  const handleDeleteRoom = () => {
-    mutate({ roomId: selectedRoom?.id, userId: userInfo?.id });
-  };
+  const [connection, setConnection] = useState<signalR.HubConnection | null>(
+    null
+  );
+  const [api, contextHolder] = notification.useNotification();
   const handleClick = (room: any) => {
     setSelectedRoom(room);
   };
@@ -56,7 +63,65 @@ const SidebarLayout: React.FC = () => {
 
   const handleJoinRoom = () => {};
 
-  const handleLeaveRoom = () => {};
+  useEffect(() => {
+    const newConnection = new signalR.HubConnectionBuilder()
+      .withUrl("https://localhost:7004/chatHub")
+      .withAutomaticReconnect()
+      .build();
+
+    setConnection(newConnection);
+  }, []);
+
+  // useEffect(() => {
+  //   const startConnection = async () => {
+  //     if (!connection) return;
+  //     try {
+  //       await connection.start();
+  //       // joinRoom();
+  //       console.log("Connected to SignalR!");
+  //     } catch (err: any) {
+  //       console.error("Connection error: ", err);
+  //     }
+  //   };
+
+  //   startConnection();
+
+  //   return () => {
+  //     if (connection) {
+  //       connection.stop();
+  //     }
+  //   };
+  // }, [connection]);
+
+  // const handleLeaveRoom = async () => {
+  //   if (connection?.state === "Connected" && selectedRoom?.id && userInfo?.id) {
+  //     await connection?.invoke("LeaveRoom", selectedRoom?.id, userInfo?.id);
+  //     window.location.reload();
+  //   } else {
+  //     console.log("Some error onleaving room");
+  //   }
+  // };
+
+  const handleLeaveRoom = async (roomId: string) => {
+    if (connection?.state === "Connected" && roomId && userInfo?.id) {
+      try {
+        await connection.invoke("LeaveRoom", roomId, userInfo?.id);
+
+        api.success({
+          message: `You left the room successfully.`,
+        });
+
+        setTimeout(() => window.location.reload(), 1000);
+      } catch (err) {
+        console.error("Error leaving room:", err);
+        api.error({
+          message: `Failed to leave the room.`,
+        });
+      }
+    } else {
+      console.log("Some error on leaving room");
+    }
+  };
 
   const items = [
     {
@@ -67,34 +132,26 @@ const SidebarLayout: React.FC = () => {
           Leave Room
         </span>
       ),
-      // onClick:handleLeaveRoom
-    },
-    {
-      key: "2",
-      label: (
-        <span style={{ color: "red" }}>
-          <DeleteOutlined className="mr-8" />
-          Delete Room
-        </span>
-      ),
-      onClick: handleDeleteRoom,
     },
   ];
 
-  useEffect(() => {
-    if (searchRoom) {
-      if (FilterRooms?.length > 0) {
-        setSelectedRoom(FilterRooms[0]);
-      }
-    } else {
-      if (YourRooms?.length > 0) {
-        setSelectedRoom(YourRooms[0]);
-      }
+  const handleMenuClick = (e: any) => {
+    if (e.key === "1" && selectedRoom?.id) {
+      handleLeaveRoom(selectedRoom.id);
     }
-  }, [searchRoom, FilterRooms, YourRooms]);
+  };
+
+  useEffect(() => {
+    if (YourRooms?.length > 0) {
+      setSelectedRoom(YourRooms[0]);
+    } else if (AvailableRooms?.length > 0) {
+      //  setSelectedRoom(AvailableRooms[0])
+    }
+  }, [searchRoom, YourRooms]);
 
   return (
     <>
+      {contextHolder}
       <Layout style={{ height: "100vh" }}>
         <Sider
           width={300}
@@ -129,7 +186,7 @@ const SidebarLayout: React.FC = () => {
                 </Text>
               </div>
             </div>
-            <UserSettings />
+            <UserSettings connection={connection} />
             {/* <SettingOutlined className="fs-16" /> */}
           </div>
           <Divider style={{ margin: "7px 0 15px 0" }} />
@@ -140,191 +197,50 @@ const SidebarLayout: React.FC = () => {
             onSearch={(value: any) => {
               setSearchRoom(value);
             }}
+            onChange={(e: any) => {
+              e.target.value === "" ? setSearchRoom(undefined) : null;
+            }}
             allowClear
           />
-
-          {FilterRooms?.length > 0 ? (
-            <Menu
-              mode="inline"
-              defaultSelectedKeys={["0"]}
-              selectedKeys={[selectedRoom?.id?.toString()]}
-              style={{
-                border: "none",
-                padding: "8px",
-                height: FilterRooms?.length > 0 ? 150 : 300,
-                overflowY: "scroll",
-                scrollbarWidth: "none",
-              }}
-            >
-              {isLoading && <div style={{ padding: 20 }}>Loading rooms...</div>}
-              {isError && (
-                <div style={{ padding: 20, color: "red" }}>
-                  Failed to load rooms
-                </div>
-              )}
-              {FilterRooms?.map((val: any, index: number) => (
-                <Menu.Item
-                  onClick={() => handleClick(val)}
-                  key={val?.id}
-                  style={{
-                    padding: "12px",
-                    marginBottom: "8px",
-                    borderRadius: "8px",
-                    backgroundColor: "#fff",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      <span style={{ fontSize: 15, fontWeight: 600 }}>
-                        {val?.name}
-                      </span>
-                      {val?.privacy === "Private" ? (
-                        <LockOutlined
-                          style={{ color: "#ff7875", fontSize: 14 }}
-                        />
-                      ) : (
-                        <UnlockOutlined
-                          style={{ color: "#52c41a", fontSize: 14 }}
-                        />
-                      )}
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        fontSize: 12,
-                        color: "#999",
-                      }}
-                    >
-                      <span>{val?.totalMembers} members</span>
-                      <span>{val?.createdBy}</span>
-                    </div>
-                  </div>
-                </Menu.Item>
-              ))}
-            </Menu>
-          ) : (
-            <>
-              <div className="px-8">
-                <div className="d-flex">
+          <>
+            <div className="px-8">
+              <Row className="d-flex">
+                <Col>
                   <Title level={5}>
                     {YourRooms?.length > 0
                       ? `Your Rooms (${YourRooms?.length})`
                       : "Create or Join Room"}
                   </Title>
+                </Col>
+                <Col>
                   <CreateNJoinRoom />
-                </div>
+                </Col>
+              </Row>
 
-                {YourRooms?.length > 0 ? (
-                  <Menu
-                    mode="inline"
-                    defaultSelectedKeys={["0"]}
-                    style={{
-                      border: "none",
-                      padding: "8px",
-                      height: AvailableRooms?.length > 0 ? 150 : 300,
-                      overflowY: "scroll",
-                      // backgroundColor: "#",
-                      scrollbarWidth: "none",
-                    }}
-                  >
-                    {isLoading && (
-                      <div style={{ padding: 20 }}>Loading rooms...</div>
-                    )}
-                    {isError && (
-                      <div style={{ padding: 20, color: "red" }}>
-                        Failed to load rooms
-                      </div>
-                    )}
-                    {YourRooms?.map((val: any, index: number) => (
-                      <Menu.Item
-                        onClick={() => handleClick(val)}
-                        key={index}
-                        style={{
-                          padding: "12px",
-                          marginBottom: "8px",
-                          borderRadius: "8px",
-                          backgroundColor: "#fff",
-                          boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-                          transition: "all 0.2s",
-                        }}
-                      >
-                        <div>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            <span style={{ fontSize: 15, fontWeight: 600 }}>
-                              {val?.name}
-                            </span>
-                            {val?.privacy === "Private" ? (
-                              <LockOutlined
-                                style={{ color: "#ff7875", fontSize: 14 }}
-                              />
-                            ) : (
-                              <UnlockOutlined
-                                style={{ color: "#52c41a", fontSize: 14 }}
-                              />
-                            )}
-                          </div>
-
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              fontSize: 12,
-                              color: "#999",
-                            }}
-                          >
-                            <span>{val?.totalMembers} members</span>
-                            <span>{val?.createdBy}</span>
-                          </div>
-                        </div>
-                      </Menu.Item>
-                    ))}
-                  </Menu>
-                ) : (
-                  <Empty
-                    description="No rooms available yet"
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  />
-                )}
-              </div>
-              <Divider />
-              <div className="px-8">
-                <Title level={5}>
-                  {AvailableRooms?.length > 0 &&
-                    `Available Rooms (${AvailableRooms?.length})`}
-                </Title>
-
+              {YourRooms?.length > 0 ? (
                 <Menu
                   mode="inline"
+                  defaultSelectedKeys={["0"]}
                   style={{
                     border: "none",
                     padding: "8px",
-                    height: AvailableRooms?.length > 0 ? 150 : 0,
+                    height: AvailableRooms?.length > 0 ? 150 : 300,
                     overflowY: "scroll",
                     // backgroundColor: "#",
                     scrollbarWidth: "none",
                   }}
                 >
-                  {AvailableRooms?.map((val: any, index: number) => (
+                  {isLoading && (
+                    <div style={{ padding: 20 }}>Loading rooms...</div>
+                  )}
+                  {isError && (
+                    <div style={{ padding: 20, color: "red" }}>
+                      Failed to load rooms
+                    </div>
+                  )}
+                  {YourRooms?.map((val: any, index: number) => (
                     <Menu.Item
-                      onClick={() => handleRoomPreviewModal(val)}
+                      onClick={() => handleClick(val)}
                       key={index}
                       style={{
                         padding: "12px",
@@ -373,9 +289,85 @@ const SidebarLayout: React.FC = () => {
                     </Menu.Item>
                   ))}
                 </Menu>
-              </div>
-            </>
-          )}
+              ) : (
+                <Empty
+                  description="No rooms available yet"
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                />
+              )}
+            </div>
+            <Divider />
+            <div className="px-8">
+              <Title level={5}>
+                {AvailableRooms?.length > 0 &&
+                  `Available Rooms (${AvailableRooms?.length})`}
+              </Title>
+
+              <Menu
+                mode="inline"
+                style={{
+                  border: "none",
+                  padding: "8px",
+                  height: AvailableRooms?.length > 0 ? 150 : 0,
+                  overflowY: "scroll",
+                  // backgroundColor: "#",
+                  scrollbarWidth: "none",
+                }}
+              >
+                {AvailableRooms?.map((val: any, index: number) => (
+                  <Menu.Item
+                    onClick={() => handleRoomPreviewModal(val)}
+                    key={index}
+                    style={{
+                      padding: "12px",
+                      marginBottom: "8px",
+                      borderRadius: "8px",
+                      backgroundColor: "#fff",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        <span style={{ fontSize: 15, fontWeight: 600 }}>
+                          {val?.name}
+                        </span>
+                        {val?.privacy === "Private" ? (
+                          <LockOutlined
+                            style={{ color: "#ff7875", fontSize: 14 }}
+                          />
+                        ) : (
+                          <UnlockOutlined
+                            style={{ color: "#52c41a", fontSize: 14 }}
+                          />
+                        )}
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          fontSize: 12,
+                          color: "#999",
+                        }}
+                      >
+                        <span>{val?.totalMembers} members</span>
+                        <span>{val?.createdBy}</span>
+                      </div>
+                    </div>
+                  </Menu.Item>
+                ))}
+              </Menu>
+            </div>
+          </>
+          {/* )} */}
         </Sider>
 
         <Layout>
@@ -426,7 +418,6 @@ const SidebarLayout: React.FC = () => {
                           </Avatar>
                         );
                       })}
-
                     {selectedRoom?.membersName?.length > 5 && (
                       <Avatar
                         style={{
@@ -444,12 +435,17 @@ const SidebarLayout: React.FC = () => {
                 </span>
               </Title>
               <Text type="secondary">
-                {selectedRoom?.totalMembers
-                  ? `${selectedRoom?.totalMembers} members · ${selectedRoom?.description}`
-                  : "Click a room from the sidebar to start chatting"}
+                <span> {selectedRoom?.membersName?.length ?? 0} members </span>
+                {selectedRoom?.description && (
+                  <span>- {selectedRoom.description}</span>
+                )}
               </Text>
             </div>
-            <Dropdown menu={{ items }} placement="bottomRight" arrow>
+            <Dropdown
+              menu={{ items, onClick: handleMenuClick }}
+              placement="bottomRight"
+              arrow
+            >
               <MoreOutlined style={{ fontSize: "20px" }} />
             </Dropdown>
           </Header>
@@ -472,7 +468,12 @@ const SidebarLayout: React.FC = () => {
                 borderTop: "1px solid #eee",
               }}
             >
-              {selectedRoom && <ChatCompent room={selectedRoom} />}
+              {selectedRoom && (
+                <ChatCompent
+                  selectedRoom={selectedRoom}
+                  connection={connection}
+                />
+              )}
             </div>
           </Content>
         </Layout>

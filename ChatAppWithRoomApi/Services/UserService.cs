@@ -1,4 +1,5 @@
-﻿using ChatAppWithRoomApi.Models;
+﻿using ChatAppWithRoomApi.DTO;
+using ChatAppWithRoomApi.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -51,7 +52,7 @@ namespace ChatAppWithRoomApi.Services
 
             if (user is null)
             {
-                throw new Exception("No user found");
+                throw new Exception("We couldn’t find an account with that email address.");
             }
             var Verify = BCrypt.Net.BCrypt.EnhancedVerify(password, user.PasswordHash);
 
@@ -62,18 +63,30 @@ namespace ChatAppWithRoomApi.Services
             }
             else
             {
-                throw new Exception("User name or Password is incorrect ");
+                throw new Exception("Invalid email or password. Please try again.");
             }
 
         }
 
         public async Task<User> GetUserIfExistAysnc(string email, string name)
         {
-            return await _userCollection.Find(x => x.Email == email  || x.Name == name).FirstOrDefaultAsync();
+            return await _userCollection.Find(x => x.Email == email  || x.Name.ToLower() == name.ToLower()).FirstOrDefaultAsync();
         }
 
-        public async Task UpdateAsync(string id, User updateUser) =>
-          await _userCollection.ReplaceOneAsync(x => x.Id == id, updateUser);
+        public async Task<User> UpdateUserAsync(string id, UserDto updateUser)
+        {
+            var update = Builders<User>.Update
+                .Set(x => x.Name, updateUser.Name)
+                .Set(x => x.Email, updateUser.Email);
+
+
+            await _userCollection.UpdateOneAsync(x =>  x.Id == id, update);
+
+           var user =  await _userCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+
+            return user;
+
+        }
 
         public async Task DeleteAsync(string id) =>
             await _userCollection.DeleteOneAsync(x => x.Id == id);

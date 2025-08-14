@@ -11,6 +11,7 @@ import { token } from "./store/authSlice";
 function App() {
   const isAuthenticated = useSelector(token);
   return (
+    
     <ConfigProvider
       theme={{
         components: {
@@ -19,6 +20,9 @@ function App() {
             borderRadiusLG: 10,
             borderRadiusSM: 10,
           },
+          Modal:{
+            // colorBgMask:'rgba(0, 0, 0, 0.45)'
+          }
         },
       }}
     >

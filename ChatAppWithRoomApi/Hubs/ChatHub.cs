@@ -46,7 +46,7 @@ namespace ChatAppWithRoomApi.Hubs
 
         public async Task Typing(string roomId,string user)
         {
-            await Clients.Group(roomId).SendAsync("UserTyping", user);
+            await Clients.Group(roomId).SendAsync("UserTyping",roomId , user);
         }
 
         public async Task LeaveRoom(string roomId,string userId)

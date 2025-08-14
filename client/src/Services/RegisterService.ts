@@ -5,11 +5,11 @@ export const useRegister = () => {
     return useMutation({
         mutationFn:register,
         onSuccess: () => {
-        window.location.pathname = '/login'; 
+        // window.location.pathname = '/login'; 
         },
         onError: (error: any) => {
             console.error("Register failed:", error);
-            alert("Register failed. Please try again.");
+            // alert("Register failed. Please try again.");
         }
     })
 }

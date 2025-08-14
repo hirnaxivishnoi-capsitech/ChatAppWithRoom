@@ -41,27 +41,27 @@ namespace ChatAppWithRoomApi.Controllers
                 if(roomExist != null)
                 {
                     res.Status = false;
-                    res.Message = "Room already Created";
-                    return Conflict(res);
+                    res.Message = "Room already exist";
+                    return res;
                 }
 
                 if (room.CreatedBy == null || string.IsNullOrEmpty(room.CreatedBy.Id))
                 {
-                    return BadRequest("CreatedBy ID is required.");
+                    return BadRequest("The creator's user ID is required to create a room.");
                 }
 
                 var creator = await _userService.GetUserById(room.CreatedBy.Id);
 
                 if (creator == null)
                 {
-                    return NotFound("Creator user not found.");
+                    return NotFound("The specified creator could not be found");
                 }
 
                 if(room.IsPrivate)
                 {
                     if(String.IsNullOrEmpty(room.Password)){
 
-                        return BadRequest("Password is required");
+                        return BadRequest("A password is required to create a private room.");
                     } 
                 };
 
@@ -72,7 +72,7 @@ namespace ChatAppWithRoomApi.Controllers
 
                 res.Result = createdRoom;
 
-                res.Message = "Successfully Created Room";
+                res.Message = " The room has been created successfully";
                 return Ok(res);
 
 
@@ -84,15 +84,15 @@ namespace ChatAppWithRoomApi.Controllers
         }
 
 
-        [HttpGet("GetAllRooms/{roomName}")]
+        [HttpGet("GetAllRooms")]
 
-        public async Task<ActionResult<ApiResponse<List<Room>>>> GetAllRooms(string? roomName)
+        public async Task<ActionResult<ApiResponse<List<Room>>>> GetAllRooms()
         {
             var res = new ApiResponse<List<Room>>();
 
             try
             { 
-                    var rooms = await _roomService.GetFilterRoom(roomName);
+                    var rooms = await _roomService.GetAllRoom();
                     res.Result = rooms;
                     res.Status = true;
                     res.Message = "List of rooms";
@@ -122,7 +122,7 @@ namespace ChatAppWithRoomApi.Controllers
                 if(roomExist == null)
                 {
                     res.Status = false;
-                    res.Message = "Room does not exist";
+                    res.Message = "The specified room could not be found.";
                     res.Result = null;
                     return res;
                 }
@@ -156,7 +156,7 @@ namespace ChatAppWithRoomApi.Controllers
                 if (roomExist == null)
                 {
                     res.Status = false;
-                    res.Message = "Room does not exist";
+                    res.Message = "The specified room could not be found.";
                     res.Result = null;
                     return res;
                 }
@@ -166,14 +166,14 @@ namespace ChatAppWithRoomApi.Controllers
                     if (String.IsNullOrEmpty(joinRoom.Password))
                     {
                         res.Status = false;
-                        res.Message = "Password is required";
+                        res.Message = "A password is required to join this private room";
                         res.Result = null;
                         return res;
                     }
                     if (roomExist.Password != joinRoom.Password) 
                     {
                         res.Status = false;
-                        res.Message = "Invalid password";
+                        res.Message = "The password provided is incorrect.";
                         res.Result = null;
                         return res;
                         
@@ -195,24 +195,24 @@ namespace ChatAppWithRoomApi.Controllers
         }
 
         [HttpGet("GetYourRooms/{userId}")]
-        public async Task<ApiResponse<List<Room>>> GetYourRooms(string userId)
+        public async Task<ApiResponse<List<Room>>> GetYourRooms(string userId, [FromQuery]string? room)
         {
             var res = new ApiResponse<List<Room>>();
 
             try
             {
 
-                var userRooms = await _roomService.GetYourRooms(userId);
+                var userRooms = await _roomService.GetYourRooms(userId,room);
 
                 if(userRooms == null)
                 {
                     res.Status = false;
-                    res.Message = "No rooms";
+                    res.Message = "No rooms found";
                     res.Result = null;
                     return res;
                 }
 
-                res.Message = "User Rooms";
+                res.Message = "Available rooms retrieved successfully";
                 res.Result = userRooms;
                 return res;
 
@@ -229,24 +229,24 @@ namespace ChatAppWithRoomApi.Controllers
 
 
         [HttpGet("GetAvaliableRooms/{userId}")]
-        public async Task<ApiResponse<List<Room>>> GetAvaliableRooms(string userId)
+        public async Task<ApiResponse<List<Room>>> GetAvaliableRooms(string userId,[FromQuery] string? room)
         {
             var res = new ApiResponse<List<Room>>();
 
             try
             {
 
-                var userRooms = await _roomService.GetAvaliableRooms(userId);
+                var userRooms = await _roomService.GetAvaliableRooms(userId,room);
 
                 if (userRooms == null)
                 {
                     res.Status = false;
-                    res.Message = "No rooms";
+                    res.Message = "No rooms found";
                     res.Result = null;
                     return res;
                 }
 
-                res.Message = "User Rooms";
+                res.Message = "Available rooms retrieved successfully";
                 res.Result = userRooms;
                 return res;
 
@@ -276,7 +276,7 @@ namespace ChatAppWithRoomApi.Controllers
                 if (room.CreatedBy.Id != deleteRoomDto.userId)
                 {
                     res.Status = false;
-                    res.Message = "Only Admin can delete this room";
+                    res.Message = "Only the room creator is allowed to delete this room.";
                     res.Result = false;
                     return res;
                 }

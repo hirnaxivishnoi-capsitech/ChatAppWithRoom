@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { create, getAll, getById, getFilterRoomsByUserIdNRoomName, removeRoom } from "../ApiUtility/apiServices";
+import { create, getAll, getFilterRoomsByUserIdNRoomName, removeRoom } from "../ApiUtility/apiServices";
 import { endpoints } from "../ApiUtility/endpoints";
 import { queryClient } from "../main";
 import dayjs from "dayjs";
@@ -18,20 +18,18 @@ export const useCreateRoom = (userId: any) => {
     mutationFn: (data: any) => create(endpoints.rooms.createRoom, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["useGetYourRooms", userId] });
-      alert("Success");
     },
     onError: (error: any) => {
       console.error("Room creation failed:", error);
-      alert("Room creation failed. Please try again.");
     },
   });
 };
 
-export const useGetAllRoom = (roomName:string|undefined) => {
+export const useGetAllRoom = (open:boolean) => {
   return useQuery({
-    queryKey: ["useGetAllRooms",roomName],
+    queryKey: ["useGetAllRooms"],
     queryFn: async () => {
-      const res = await getById(endpoints.rooms.getAllRooms , roomName);
+      const res = await getAll(endpoints.rooms.getAllRooms );
 
       if (!res.result || !Array.isArray(res.result)) {
         return [];
@@ -48,19 +46,16 @@ export const useGetAllRoom = (roomName:string|undefined) => {
 
       return transformed;
     },
-    enabled: !!roomName ,
-    // enabled : true,
+    enabled: !!open ,
   });
 };
 
-
-
-export const useGetYourRoom = (userId: any) => {
+export const useGetYourRoom = (userId: any,room?:string) => {
   return useQuery({
-    queryKey: ["useGetYourRooms", userId],
+    queryKey: ["useGetYourRooms", userId,room],
     queryFn: async ({ queryKey }) => {
-      const [, id] = queryKey;
-      const res = await getById(endpoints.rooms.getYourRooms, id);
+      const [, id , room] = queryKey;
+      const res = await getFilterRoomsByUserIdNRoomName(endpoints.rooms.getYourRooms, id, room);
 
       if (!res.result || !Array.isArray(res.result)) {
         return [];
@@ -82,12 +77,12 @@ export const useGetYourRoom = (userId: any) => {
   });
 };
 
-export const useGetAvaliableRoom = (userId: any) => {
+export const useGetAvaliableRoom = (userId: any,room?: string ) => {
   return useQuery({
-    queryKey: ["useGetAvaliableRooms", userId],
+    queryKey: ["useGetAvaliableRooms", userId,room],
     queryFn: async ({ queryKey }) => {
-      const [, id] = queryKey;
-      const res = await getById(endpoints.rooms.getAvaliableRooms, id);
+      const [, id,room] = queryKey;
+      const res = await getFilterRoomsByUserIdNRoomName(endpoints.rooms.getAvaliableRooms, id,room);
 
       if (!res.result || !Array.isArray(res.result)) {
         return [];
@@ -112,13 +107,14 @@ export const useGetAvaliableRoom = (userId: any) => {
 export const useJoinRoom = (userId: any) => {
   return useMutation({
     mutationFn: (payload: JoinRoomPayload) =>
-      create(endpoints.rooms.joinRoom, payload),
+    {
+      return create(endpoints.rooms.joinRoom, payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["useGetYourRooms", userId] });
       queryClient.invalidateQueries({
         queryKey: ["useGetAvaliableRooms", userId],
       });
-      alert("Successfully Joined the room");
     },
     onError: (error: any) => {
       console.error("Failed in joining room", error);
@@ -135,11 +131,9 @@ export const useDeleteRoom = (userId:string) => {
       queryClient.invalidateQueries({
         queryKey: ["useGetAvaliableRooms", userId],
       });
-      alert("Successfully deleted the room");
     },
      onError: (error: any) => {
       console.error("Failed in joining room", error);
-      alert("Failed in deleting room. Please try again.");
     },
   });
 };

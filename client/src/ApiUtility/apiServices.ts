@@ -17,7 +17,7 @@ export const getById = async (url: string, id: string | undefined) => {
 
 
 export const update = async (url: string, id: string, data: any) => {
-   const response =await  axiosInstance.put(`${url}/${id}`, data);
+   const response =await  axiosInstance.post(`${url}/${id}`, data);
     return response?.data;
 }
 
@@ -31,7 +31,9 @@ export const removeRoom = async (url: string, payload: any) => {
     return response?.data;
 }
 
-export const getFilterRoomsByUserIdNRoomName = async (url: string, id: string | undefined,roomName:string | undefined) => {
-   const response = await axiosInstance.get(`${url}/${id}/${roomName}`);
+export const getFilterRoomsByUserIdNRoomName = async (url: string, id: string | undefined,room:string | undefined) => {
+   const response = await axiosInstance.get(`${url}/${id}`,{
+    params:room ? {room} : {}
+   });
     return response?.data;
 }

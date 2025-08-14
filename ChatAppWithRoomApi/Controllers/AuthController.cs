@@ -30,21 +30,21 @@ namespace ChatAppWithRoomApi.Controllers
                 if (user != null)
                 {
                     var token = _authService.generateJWTToken(user);
-                    res.Result = new AuthResponse { Email = user.Email, Token = token , Name = user.Name , Id = user.Id };
+                    res.Result = new AuthResponse { Email = user.Email,   Token = token , Name = user.Name , Id = user.Id };
                     res.Message = "Login Successful";
                     return res;
                 }
                 res.Status = false;
                 res.Message = "Login Failed";
-                return res;
+               
             }
             catch (Exception ex)
             {
                 res.Message = ex.Message;
                 res.Status = false;
-                throw new Exception("no user found");
 
             }
+            return res;
         }
 
         [HttpPost("register")]
@@ -55,7 +55,7 @@ namespace ChatAppWithRoomApi.Controllers
 
             try
             {
-                var userExist = await _userService.GetUserIfExistAysnc(register.Name, register.Email);
+                var userExist = await _userService.GetUserIfExistAysnc(register.Email, register.Name);
                 if (userExist != null)
                 {
 

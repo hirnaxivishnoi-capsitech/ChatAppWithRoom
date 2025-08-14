@@ -6,7 +6,8 @@ export const endpoints = {
     register: `${BASE_URL}/Auth/register`,
   },
   users: {
-
+    getUserById : `${BASE_URL}/User`,
+    updateUser : `${BASE_URL}/User`,
   },
   rooms :{
     createRoom: `${BASE_URL}/Room/CreateRoom`,

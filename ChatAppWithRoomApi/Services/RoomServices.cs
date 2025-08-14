@@ -34,7 +34,7 @@ namespace ChatAppWithRoomApi.Services
 
             if (room == null)
             {
-                throw new Exception("No Room Found");
+                throw new Exception("The specified room could not be found.");
             }
             return room;
         }
@@ -96,8 +96,43 @@ namespace ChatAppWithRoomApi.Services
         public async Task<List<Room>> GetYourRooms(string userId) =>
             await _roomCollection.Find(r => r.Members.Any(m => m.Id == userId)).ToListAsync();
 
+        public async Task<List<Room>> GetYourRooms(string userId, string? roomName = null)
+        {
+            var filterBuilder = Builders<Room>.Filter;
+
+            var memberFilter = filterBuilder.ElemMatch(r => r.Members, m => m.Id == userId);
+
+            var filter = memberFilter;
+
+            if (!string.IsNullOrEmpty(roomName))
+            {
+                var regexFilter = filterBuilder.Regex(r => r.Name, new MongoDB.Bson.BsonRegularExpression(roomName, "i"));
+                filter = filter & regexFilter;
+            }
+
+            return await _roomCollection.Find(filter).ToListAsync();
+        }
+
+
         public async Task<List<Room>> GetAvaliableRooms(string userId) =>
             await _roomCollection.Find(r => !r.Members.Any(m => m.Id == userId)).ToListAsync();
+
+        public async Task<List<Room>> GetAvaliableRooms(string userId, string? roomName = null)
+        {
+            var filterBuilder = Builders<Room>.Filter;
+
+            var memberFilter = filterBuilder.Not(filterBuilder.ElemMatch(r => r.Members, m => m.Id == userId));
+
+            var filter = memberFilter;
+
+            if (!string.IsNullOrEmpty(roomName))
+            {
+                var regexFilter = filterBuilder.Regex(r => r.Name, new MongoDB.Bson.BsonRegularExpression(roomName, "i"));
+                filter = filter & regexFilter;
+            }
+
+            return await _roomCollection.Find(filter).ToListAsync();
+        }
 
         public async Task RemoveUserFromRoom(string roomId,string userId)
         {
@@ -105,7 +140,7 @@ namespace ChatAppWithRoomApi.Services
 
             if(room == null)
             {
-                throw new Exception("No room Found");
+                throw new Exception("The specified room could not be found.");
             }
 
             if (room.Members == null)
@@ -117,7 +152,7 @@ namespace ChatAppWithRoomApi.Services
 
             if(user == null)
             {
-                throw new Exception("No user Found");
+                throw new Exception("The specified user is not a member of this room.");
             }
             
             room.Members.Remove(user);

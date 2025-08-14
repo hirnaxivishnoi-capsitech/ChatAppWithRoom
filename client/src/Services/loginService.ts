@@ -11,7 +11,7 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: login,
     onSuccess: (data: any) => {
-      if (data || data?.result) {
+      if (data?.status) {
         dispatch(setUserData(data?.result));
         naviagte('/ryzo/')
       }
@@ -19,7 +19,6 @@ export const useLogin = () => {
     },
     onError: (error: any) => {
       console.error("Login failed:", error);
-      alert("Login failed. Please check your credentials and try again.");
     },
   });
 };

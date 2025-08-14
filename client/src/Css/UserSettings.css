@@ -1,24 +1,115 @@
-.user-settings-layout {
-  background: #f0f2f5;
-}
-
-.settings-sider {
-  background: #fff;
-  border-right: 1px solid #e5e5e5;
-}
-
-.settings-content {
-  padding: 0px 40px 10px 40px;
-  background: #fff;
-}
-
 .profile-header {
   display: flex;
   align-items: center;
   gap: 16px;
+  background-color: #f0f2f5;
+  padding: 16px 24px; 
+  border-radius: 12px;
+  margin-bottom: 24px;
+  position: relative;
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
 }
+
+.room-card {
+  border-radius: 16px !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.3s ease;
+}
+
+.room-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+}
+
+.room-card .ant-card-head {
+  border-bottom: none;
+  padding: 0 24px;
+}
+
+.room-card .ant-card-body {
+  padding-top: 0;
+}
+
+/* Scrollbar styling for a cleaner look */
+.room-list-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.room-list-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.room-list-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.room-list-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.user-settings-layout {
+  background: #f0f2f5;
+  border-radius: 16px;
+  overflow: hidden; /* This is important to contain the rounded corners */
+}
+
+.settings-sider {
+  background: #fff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column; /* Use flexbox to position the menu items */
+}
+
+.settings-menu {
+  flex-grow: 1; /* Make the menu grow to fill the available space */
+  border: none;
+  background: none;
+}
+
+.settings-menu .ant-menu-item,
+.settings-menu .ant-menu-submenu-title {
+  border-radius: 8px; /* Add rounded corners to menu items */
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.settings-menu .ant-menu-item:hover {
+  background-color: #f0f2f5 !important;
+  color: #1890ff !important;
+}
+
+.settings-menu .ant-menu-item-selected {
+  background-color: #e6f7ff !important; /* Lighter blue for active state */
+  color: #1890ff !important;
+  font-weight: 600;
+}
+
+.sign-out-menu .ant-menu-item {
+  color: #ff4d4f !important; /* Red for danger action */
+  background-color: #fff1f0 !important;
+  border-radius: 8px;
+}
+
+.sign-out-menu .ant-menu-item:hover {
+  background-color: #ffccc7 !important;
+}
+
+.sign-out-menu .ant-menu-item-selected {
+  background-color: #fff1f0 !important;
+}
+
+.settings-content {
+  /* padding: 24px 40px; */
+  background: #fff;
+}
+
+.ant-menu-light.ant-menu-root.ant-menu-inline{
+border-inline-end-width: 0px;
+}
+

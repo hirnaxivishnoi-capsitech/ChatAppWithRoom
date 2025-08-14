@@ -1,16 +1,10 @@
 import React from "react";
-import { Button, Card, Form, Input, Typography } from "antd";
+import { Button, Card, Form, Input, notification, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
-import {
-  LockOutlined,
-  LoginOutlined,
-  MailOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
 import Header from "../Header";
 import "../../Css/Register.css"; // ✅ Add your stylesheet
 import { useRegister } from "../../Services/RegisterService";
-import bcrypt from "bcryptjs";
 
 const { Title, Text } = Typography;
 
@@ -22,29 +16,48 @@ const formItemLayout = {
 const Register = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const {mutate: registerMutate} = useRegister();
+  const registerMutate = useRegister();
+  const [api, contextHolder] = notification.useNotification();
 
-    const onFinish = async (values: any) => {
-      // const hashedPassword = bcrypt.hashSync(
-      //   values.password,
-      //   "$2b$13$jtClg6Qdy2xn7Oer8FH3m."
-      // );
-      
-      try {
-          await registerMutate( values);
-      } catch (error: any) {
-        if (error.response?.status === 409) {
-          alert(error.response.data.message || "User already exists.");
-        } else {
-          console.error("Error:", error);
-          alert("Something went wrong during sign up.");
-        }
-        // form.resetFields();
+  const onFinish = async (values: any) => {
+    // const hashedPassword = bcrypt.hashSync(
+    //   values.password,
+    //   "$2b$13$jtClg6Qdy2xn7Oer8FH3m."
+    // );
+
+    try {
+      await registerMutate
+        .mutateAsync(values)
+        .then((res: any) => {
+          if (res?.status) {
+            api.success({ message: res?.message });
+            setTimeout(()=>navigate('/login'),2000);
+          } else {
+            api.error({ message: res?.message });
+          }
+        })
+        .catch((error: any) => {
+          api.error({
+            message: error?.response?.data?.message || "Something went wrong",
+          });
+        })
+        .finally(() => {
+          form.resetFields();
+        });
+    } catch (error: any) {
+      if (error.response?.status === 409) {
+        alert(error.response.data.message || "User already exists.");
+      } else {
+        console.error("Error:", error);
+        alert("Something went wrong during sign up.");
       }
-    };
+      // form.resetFields();
+    }
+  };
 
   return (
     <>
+      {contextHolder}
       <Header />
       <div className="register-container">
         <Card
@@ -56,9 +69,9 @@ const Register = () => {
           //   </div>
           // }
         >
-          <div className="d-flex" >
+          <div className="d-flex">
             {/* Left Section - Form */}
-            <div style={{width: "500px"}}> 
+            <div style={{ width: "500px" }}>
               <Title
                 level={3}
                 style={{ color: "#2D1A5B", marginBottom: 0 }}
@@ -80,7 +93,7 @@ const Register = () => {
                 {...formItemLayout}
                 name="register"
                 // scrollToFirstError
-                  form={form}
+                form={form}
                 layout="vertical"
                 style={{ marginTop: 30 }}
                 autoComplete="off"
@@ -202,7 +215,6 @@ const Register = () => {
                 alignItems: "center",
                 justifyContent: "center",
               }}
-
             >
               <img
                 src="5516.png"

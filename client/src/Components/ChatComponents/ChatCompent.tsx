@@ -1,21 +1,25 @@
-import { Avatar, Button, Input, Upload } from "antd";
+import { Avatar, Button, Input, Upload, message } from "antd";
 import React, { useEffect, useState } from "react";
 import * as signalR from "@microsoft/signalr";
-import {
-  LogoutOutlined,
-  SendOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { SendOutlined, SmileOutlined, UploadOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { userData } from "../../store/authSlice";
-// import { useGetMessagesByRoomId } from "../../Services/MessageService";
+import EmojiPicker from "emoji-picker-react";
+import TextArea from "antd/es/input/TextArea";
 
-const ChatCompent = (selectedRoom: any) => {
+interface ChatComponentProps {
+  selectedRoom: any;
+  connection: signalR.HubConnection | null;
+}
+
+const ChatCompent: React.FC<ChatComponentProps> = ({
+  selectedRoom,
+  connection,
+}) => {
   const userInfo = useSelector(userData);
-  // const { data } = useGetMessagesByRoomId(selectedRoom?.room?.id);
-  const [connection, setConnection] = useState<signalR.HubConnection | null>(
-    null
-  );
+  // const [connection, setConnection] = useState<signalR.HubConnection | null>(
+  //   null
+  // );
   const [messages, setMessages] = useState("");
   const [chat, setChat] = useState<
     {
@@ -26,50 +30,61 @@ const ChatCompent = (selectedRoom: any) => {
   >([]);
   const [typingUser, setTypingUser] = useState<string | null>(null);
   const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
+  const onEmojiClick = (emojiObject: any) => {
+    setMessages((prev) => prev + emojiObject.emoji);
+    setShowEmojiPicker(false);
+  };
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // useEffect(() => {
+  //   const newConnection = new signalR.HubConnectionBuilder()
+  //     .withUrl("https://localhost:7004/chatHub")
+  //     .withAutomaticReconnect()
+  //     .build();
+
+  //   setConnection(newConnection);
+  // }, []);
+
   useEffect(() => {
-    const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7004/chatHub")
-      .withAutomaticReconnect()
-      .build();
+    if (!connection) return;
 
-    setConnection(newConnection);
-  }, []);
-
-  useEffect(() => {
-    const startConnection = async () => {
-      if (!connection) return;
-      try {
-        await connection.start();
-        joinRoom();
-        console.log("Connected to SignalR!");
-      } catch (err: any) {
-        console.error("Connection error: ", err);
-      }
-    };
-
-    startConnection();
+    if (connection.state !== "Connected") {
+      connection
+        .start()
+        .then(() => {
+          console.log("Connected to SignalR!");
+          if (selectedRoom?.id) {
+            joinRoom();
+          }
+        })
+        .catch((err) => console.error("Connection error: ", err));
+    } else {
+      // if (selectedRoom?.id) {
+      //   joinRoom();
+      // }
+    }
 
     return () => {
-      if (connection) {
-        connection.stop();
-      }
+      connection.off("UserTyping");
+      connection.off("ReceiveMessage");
+      connection.off("LoadHistory");
     };
-  }, [connection]);
+  }, [connection, selectedRoom?.id]);
 
   const joinRoom = () => {
-    if (connection?.state === "Connected" && selectedRoom?.room?.id) {
-      connection.invoke("JoinRoom", selectedRoom?.room?.id, userInfo?.id);
-      connection.on("UserTyping", ( userName: string) => {
-        
-        if (userName !== userInfo?.name  ) {
-            setTypingUser(userName);
-            setTimeout(() => setTypingUser(null), 2000);
+    if (connection?.state === "Connected" && selectedRoom?.id) {
+      connection.invoke("JoinRoom", selectedRoom?.id, userInfo?.id);
+
+      connection.on("UserTyping", (roomId: any, userName: string) => {
+        if (roomId === selectedRoom?.id && userName !== userInfo?.name) {
+          setTypingUser(userName);
+          setTimeout(() => setTypingUser(null), 1000);
         }
+
         console.log(`${userName} is typing...`);
       });
       connection.on("LoadHistory", (historyMessages: any[]) => {
@@ -84,7 +99,7 @@ const ChatCompent = (selectedRoom: any) => {
       connection.on(
         "ReceiveMessage",
         (roomId, userId, userName, message, createdAt) => {
-          if (roomId === selectedRoom?.room?.id) {
+          if (roomId === selectedRoom?.id) {
             setChat((prevChat) => [
               ...prevChat,
               {
@@ -102,7 +117,8 @@ const ChatCompent = (selectedRoom: any) => {
   };
 
   useEffect(() => {
-    if (!connection || !selectedRoom?.room?.id) return;
+    if (!connection || connection.state !== "Connected" || !selectedRoom?.id)
+      return;
 
     joinRoom();
 
@@ -111,12 +127,12 @@ const ChatCompent = (selectedRoom: any) => {
       connection.off("ReceiveMessage");
       connection.off("LoadHistory");
     };
-  }, [selectedRoom?.room?.id, connection]);
+  }, [selectedRoom?.id, connection]);
 
   const sendMessage = async () => {
     if (
-      !selectedRoom?.room?.id ||
-      !selectedRoom?.room?.name ||
+      !selectedRoom?.id ||
+      !selectedRoom?.name ||
       !userInfo?.id ||
       !userInfo?.name
     ) {
@@ -126,8 +142,8 @@ const ChatCompent = (selectedRoom: any) => {
     if (messages.trim() && connection) {
       await connection.invoke(
         "SendMessage",
-        selectedRoom?.room?.id,
-        selectedRoom?.room?.name,
+        selectedRoom?.id,
+        selectedRoom?.name,
         userInfo?.id,
         userInfo?.name,
         messages
@@ -164,8 +180,6 @@ const ChatCompent = (selectedRoom: any) => {
       sendMessage();
     }
   };
-
- 
 
   return (
     <div style={{ width: "100%" }}>
@@ -238,45 +252,47 @@ const ChatCompent = (selectedRoom: any) => {
         >
           <Button icon={<UploadOutlined />} className="mr-16 mt-12"></Button>
         </Upload>
-        <Input.TextArea
-          placeholder="Type your message..."
-          autoSize={{ minRows: 2, maxRows: 4 }}
-          style={{ borderRadius: 8, borderColor: "gray" }}
-          className="mr-16"
-          value={messages}
-          onKeyDown={handleKeyDown}
-          onChange={(e) => {
-            setMessages(e.target.value);
-            if (connection) {
-              connection.invoke(
-                "Typing",
-                selectedRoom?.room?.id,
-                userInfo?.name
-              );
-            }
-          }}
-        />
-        <div>
-          <LogoutOutlined
-            style={{ fontSize: "20px" }}
-            className="mr-16 mt-16"
-            onClick={async () => {
-              if (
-                connection?.state === "Connected" &&
-                selectedRoom.room.id &&
-                userInfo?.id
-              ) {
-                await connection?.invoke(
-                  "LeaveRoom",
-                  selectedRoom.room.id,
-                  userInfo?.id
-                );
-                window.location.reload();
-              } else {
-                console.log("Some error onleaving room");
+        <div style={{ position: "relative", width: "100%" }} className="mr-16">
+          <TextArea
+          // className="mr-16"
+            placeholder="Type your message..."
+            autoSize={{ minRows: 2, maxRows: 4 }}
+            style={{ borderRadius: 8, borderColor: "gray"}}
+            value={messages}
+            onKeyDown={handleKeyDown}
+            onChange={(e) => {
+              setMessages(e.target.value);
+              if (connection) {
+                setTimeout(() => {
+                  if (connection) {
+                    connection.invoke(
+                      "Typing",
+                      selectedRoom?.id,
+                      userInfo?.name
+                    );
+                  }
+                }, 500);
               }
             }}
           />
+          <SmileOutlined
+            style={{
+              position: "absolute",
+              right: 10,
+              top: "50%",
+              transform: "translateY(-50%)",
+              fontSize: 20,
+              cursor: "pointer",
+              color: "#888",
+            }}
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          />
+
+          {showEmojiPicker && (
+            <div style={{ position: "absolute", bottom: "50px", right: 0 }}>
+              <EmojiPicker onEmojiClick={onEmojiClick} />
+            </div>
+          )}
         </div>
         <SendOutlined
           onClick={sendMessage}

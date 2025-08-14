@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Modal, Form, Input, Typography, Tooltip, Tabs, Select } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  Typography,
+  Tooltip,
+  Tabs,
+  Select,
+  notification,
+} from "antd";
 import {
   LockOutlined,
   UnlockOutlined,
@@ -9,7 +18,11 @@ import {
   UsergroupAddOutlined,
 } from "@ant-design/icons";
 import "../../Css/CreateNJoinRoom.css";
-import { useCreateRoom, useGetAllRoom } from "../../Services/RoomService";
+import {
+  useCreateRoom,
+  useGetAvaliableRoom,
+  useJoinRoom,
+} from "../../Services/RoomService";
 import { useSelector } from "react-redux";
 import { userData } from "../../store/authSlice";
 
@@ -23,10 +36,15 @@ const CreateNJoinRoom: React.FC = () => {
   const [roomType, setRoomType] = useState<"public" | "private">("public");
   const [isJoinRoom, setIsJoinRoom] = useState<"create" | "join">("create");
   const [filterRoom, setFilterRoom] = useState<string | undefined>("");
-  const { data: allRooms } = useGetAllRoom(filterRoom);
-  console.log("all =>", allRooms);
-  const userDetail = useSelector(userData);
-  const { mutate } = useCreateRoom(userDetail?.id);
+  const [selectedJoinRoomId, setSelectedJoinRoomId] = useState<
+    string | undefined
+  >();
+  const userInfo = useSelector(userData);
+  const CreateRoomMutation = useCreateRoom(userInfo?.id);
+  const { data: avaliableRoom } = useGetAvaliableRoom(userInfo?.id);
+  const  JoinRoomMutation  = useJoinRoom(userInfo?.id);
+
+  const [api, contextHolder] = notification.useNotification();
 
   const showModal = () => setOpen(true);
 
@@ -45,22 +63,57 @@ const CreateNJoinRoom: React.FC = () => {
       Password: values.password || null,
       Description: values.description || "",
       CreatedBy: {
-        Id: userDetail.id,
-        Name: userDetail.name,
+        Id: userInfo.id,
+        Name: userInfo.name,
       },
       Members: [
         {
-          Id: userDetail.id,
-          Name: userDetail.name,
+          Id: userInfo.id,
+          Name: userInfo.name,
         },
       ],
     };
 
     try {
-      await mutate(finalData);
+      if (isJoinRoom === "create") {
+        const data = await CreateRoomMutation.mutateAsync(finalData);
+        if (data?.status === false) {
+          api.error({
+            message: `${data?.message}`,
+          });
+        } else {
+          api.success({ message: `"${data.result.name}" ${data?.message}` });
+        }
+        handleCancel();
+      } else {
+        if (!selectedJoinRoomId) {
+          api.error({ message: "Please select a room to join." });
+          setLoading(false);
+          return;
+        }
+        const selectedRoom = avaliableRoom.find(
+          (r: any) => r.id === selectedJoinRoomId
+        );
+
+        const data = await JoinRoomMutation.mutateAsync({
+          roomId: selectedJoinRoomId,
+          userId: userInfo?.id,
+          userName: userInfo?.name,
+          password:
+            selectedRoom?.privacy === "Private" ? values.password : undefined,
+        });
+        if (data?.status === false) {
+          api.error({ message: `${data?.message}` });
+        } else {
+          api.success({ message: `${data?.message}` });
+        }
+      }
+
       handleCancel();
-    } catch (error) {
-      console.error("Error during room operation:", error);
+    } catch (error: any) {
+      api.error({
+        message: `${error?.message} ` || "Please try again",
+      });
     } finally {
       setLoading(false);
     }
@@ -86,7 +139,11 @@ const CreateNJoinRoom: React.FC = () => {
           <Select
             showSearch
             onClick={(e: any) => setFilterRoom(e)}
-            // style={{ width: 200 }}
+            onChange={(e: any) => {
+              setSelectedJoinRoomId(e);
+              e.target.value === "" ? setSelectedJoinRoomId(undefined) : null;
+            }}
+            allowClear
             placeholder="Search to Select"
             optionFilterProp="label"
             filterSort={(optionA, optionB) =>
@@ -94,7 +151,7 @@ const CreateNJoinRoom: React.FC = () => {
                 .toLowerCase()
                 .localeCompare(String(optionB?.label ?? "").toLowerCase())
             }
-            options={allRooms?.map((room: any) => ({
+            options={avaliableRoom?.map((room: any) => ({
               value: room.id,
               label: room.name,
             }))}
@@ -132,6 +189,7 @@ const CreateNJoinRoom: React.FC = () => {
 
   return (
     <>
+      {contextHolder}
       <Tooltip title="Create or Join a Room">
         <UsergroupAddOutlined onClick={showModal} className="mt-24 fs-20" />
       </Tooltip>
