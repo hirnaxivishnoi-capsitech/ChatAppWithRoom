@@ -161,6 +161,12 @@ namespace ChatAppWithRoomApi.Services
             await _roomCollection.UpdateOneAsync(r => r.Id == roomId, update);
 
         }
+
+        public async Task SoftDelete(string id)
+        {
+            var update = Builders<Room>.Update.Set(x => x.isDeleted, true);
+            await _roomCollection.UpdateOneAsync(x => x.Id == id, update);
+        }
     }
 }
 

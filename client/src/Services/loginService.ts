@@ -13,7 +13,7 @@ export const useLogin = () => {
     onSuccess: (data: any) => {
       if (data?.status) {
         dispatch(setUserData(data?.result));
-        naviagte('/ryzo/')
+        naviagte('/hivechat/')
       }
     
     },

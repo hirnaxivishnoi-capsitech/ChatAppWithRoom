@@ -62,8 +62,8 @@ const PreviewRoomModal: React.FC<Props> = ({
             api.error({ message: `${data?.message}` });
           } else {
             api.success({ message: `${data?.message}` });
+            setTimeout(() => onClose(), 1000);
           }
-          setTimeout(() => onClose(), 1000);
         });
       } else {
         api.error({ message: "Please enter the password" });
@@ -79,10 +79,9 @@ const PreviewRoomModal: React.FC<Props> = ({
           api.error({ message: `${data?.message}` });
         } else {
           api.success({ message: `${data?.message}` });
+          setTimeout(() => onClose(), 1000);
         }
-        setTimeout(() => onClose(), 1000);
       });
-         setTimeout(() => onClose(), 1000);
     }
   };
 
@@ -93,45 +92,49 @@ const PreviewRoomModal: React.FC<Props> = ({
         open={visible}
         onClose={onClose}
         width={420}
-        bodyStyle={{ padding: 0, background: "#f9fafb" }}
+        bodyStyle={{
+          padding: 0,
+          background: "linear-gradient(180deg, #E8F0F8, #F8FAFF)",
+        }}
         headerStyle={{ display: "none" }}
         style={{ borderRadius: "12px 0 0 12px", overflow: "hidden" }}
       >
-        <div style={{ position: "relative", padding: "24px" }}>
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "140px",
-              background:
-                "radial-gradient(circle at 30% 30%, #e0e7ff, transparent)",
-              zIndex: 0,
-            }}
-          />
-
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: 12,
-              padding: "16px 20px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div
+          style={{
+            height: "100%",
+                background: "linear-gradient(180deg, #F0F3F9, #F8FAFF)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+            boxShadow: "0 0 20px rgba(0,0,0,0.05)",
+          }}
+        >
+         
+          <div style={{ flexGrow: 1, overflowY: "auto" }}>
+            <div style={{ background: "linear-gradient(180deg, #a8c1f4ff, #eff0f4ff)", padding: "24px"}}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                marginBottom: "12px",
+              }}
+            >
               {roomData?.privacy === "Private" ? (
                 <LockOutlined style={{ fontSize: 20, color: "#ef4444" }} />
               ) : (
                 <UnlockOutlined style={{ fontSize: 20, color: "#22c55e" }} />
               )}
-              <Title level={4} style={{ margin: 0 }}>
+              <Title
+                level={3}
+                style={{ margin: 0, fontWeight: 700, color: "#45629bff" }}
+              >
                 {roomData?.name}
               </Title>
             </div>
-            <div style={{ marginTop: 8 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               <Tag color={roomData?.privacy === "Private" ? "red" : "green"}>
                 {roomData?.privacy}
               </Tag>
@@ -141,90 +144,108 @@ const PreviewRoomModal: React.FC<Props> = ({
               </Tag>
             </div>
           </div>
-        </div>
 
-        <div style={{ padding: "16px 24px" }}>
-          <Text
-            type="secondary"
-            style={{ fontStyle: roomData?.description ? "normal" : "italic" }}
-          >
-            {roomData?.description || "No description provided."}
-          </Text>
-        </div>
+          {/* About ths room */}
 
-        <Divider style={{ margin: "0 0 16px 0" }} />
-
-        <div style={{ padding: "0 24px 16px" }}>
-          <Text strong>Members:</Text>
-          <div style={{ marginTop: 12, display: "flex", alignItems: "center" }}>
-            {roomData?.membersName?.slice(0, 6).map((name: any, i: any) => {
-              const colors = [
-                "#FF6B6B",
-                "#4ECDC4",
-                "#FFD93D",
-                "#6A4C93",
-                "#1A535C",
-                "#FF9F1C",
-              ];
-              return (
-                <Tooltip key={i} title={name}>
-                  <Avatar
-                    style={{
-                      backgroundColor: colors[i % colors.length],
-                      border: "2px solid white",
-                      marginLeft: i === 0 ? 0 : -10,
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                    }}
-                  >
-                    {name.charAt(0).toUpperCase()}
-                  </Avatar>
-                </Tooltip>
-              );
-            })}
-            {roomData?.membersName?.length > 6 && (
-              <Avatar style={{ backgroundColor: "#ccc", marginLeft: -10 }}>
-                +{roomData?.membersName?.length - 6}
-              </Avatar>
-            )}
+          <div style={{ padding: "20px 24px" }}>
+            <Text
+              type="secondary"
+              style={{ fontStyle: roomData?.description ? "normal" : "italic" }}
+            >
+              {roomData?.description || "No description provided."}
+            </Text>
           </div>
-          <Text type="secondary" style={{ display: "block", marginTop: 8 }}>
-            {roomData?.totalMembers} members
-          </Text>
-        </div>
 
-        <div
-          style={{
-            padding: "16px 24px",
-            background: "#fff",
-            boxShadow: "0 -2px 8px rgba(0,0,0,0.04)",
-            transition: "all 0.3s ease",
-          }}
-        >
-          {showPassword && roomData?.privacy === "Private" && (
-            <div style={{ marginBottom: 12, transition: "all 0.3s ease" }}>
-              <Input.Password
-                size="large"
-                prefix={<LockOutlined />}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password to join room..."
-              />
+          <Divider style={{ margin: "0 0 16px 0" }} />
+
+          <div style={{ padding: "0px 24px" }}>
+            <Text strong>Members:</Text>
+            <div
+              style={{ marginTop: 12, display: "flex", alignItems: "center" }}
+            >
+              {roomData?.membersName?.slice(0, 6).map((name: any, i: any) => {
+                const colors = [
+                  "#FF6B6B",
+                  "#4ECDC4",
+                  "#FFD93D",
+                  "#6A4C93",
+                  "#1A535C",
+                  "#FF9F1C",
+                ];
+                return (
+                  <Tooltip key={i} title={name}>
+                    <Avatar
+                      style={{
+                        backgroundColor: colors[i % colors.length],
+                        border: "2px solid white",
+                        marginLeft: i === 0 ? 0 : -10,
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                      }}
+                    >
+                      {name.charAt(0).toUpperCase()}
+                    </Avatar>
+                  </Tooltip>
+                );
+              })}
+              {roomData?.membersName?.length > 6 && (
+                <Avatar style={{ backgroundColor: "#ccc", marginLeft: -10 }}>
+                  +{roomData?.membersName?.length - 6}
+                </Avatar>
+              )}
             </div>
-          )}
-          <Button
-            type="primary"
-            block
+            <Text type="secondary" style={{ display: "block", marginTop: 8 }}>
+              {roomData?.totalMembers} members
+            </Text>
+          </div>
+</div>
+          {/*Button  */}
+
+          <div
             style={{
-              background: "linear-gradient(135deg, #4f46e5, #6366f1)",
-              border: "none",
-              borderRadius: "8px",
+              padding: "24px",
+              background: "rgba(255, 255, 255, 0.9)",
+              borderTop: "1px solid #E5E7EB",
+              boxShadow: "0 -2px 10px rgba(0,0,0,0.05)",
+              backdropFilter: "blur(5px)",
+              WebkitBackdropFilter: "blur(5px)",
             }}
-            onClick={handleJoin}
           >
-            {roomData?.privacy === "Private" && !showPassword
-              ? "Enter Password to Join"
-              : "Join Room"}
-          </Button>
+            {showPassword && roomData?.privacy === "Private" && (
+              <div style={{ marginBottom: 12, transition: "all 0.3s ease" }}>
+                <Input.Password
+                  size="large"
+                  prefix={<LockOutlined style={{ color: "#9CA3AF" }} />}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password to join room..."
+                  style={{
+                    marginBottom: 16,
+                    borderRadius: "8px",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                  }}
+                />
+              </div>
+            )}
+            <Button
+              type="primary"
+              block
+              size="large"
+              style={{
+                background: `#45629bff`,
+                border: "none",
+                borderRadius: "10px",
+                fontWeight: "bold",
+                transition: "all 0.2s",
+                fontSize: 16,
+                color: "#fff",
+              }}
+              onClick={handleJoin}
+            >
+              {roomData?.privacy === "Private" && !showPassword
+                ? "Enter Password to Join"
+                : "Join Room"}
+            </Button>
+          </div>
         </div>
       </Drawer>
     </>

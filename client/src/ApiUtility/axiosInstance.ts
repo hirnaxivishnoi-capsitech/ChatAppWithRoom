@@ -32,8 +32,8 @@ axiosInstance.interceptors.response.use(
 export default axiosInstance;
 
 export const logout = () => {
-    setTimeout(() => {
+    // setTimeout(() => {
       store.dispatch(clearUserData());
-    window.location.href = "/login";
-  }, 500);
+    window.location.href = "/";
+  // }, 500);
 };

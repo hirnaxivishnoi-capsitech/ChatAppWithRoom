@@ -25,6 +25,7 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.id = action.payload.id;
     },
+    
     // updateUserData: (state, action) => {
       
     //   state.id = action.payload.id;

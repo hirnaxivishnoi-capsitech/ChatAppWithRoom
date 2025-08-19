@@ -25,7 +25,7 @@ const Login = () => {
   
   useEffect(() => {
     if (Id && jwtToken) {
-      navigate("/ryzo/");
+      navigate("/hivechat/");
     }
   }, []);
 
@@ -63,19 +63,19 @@ const Login = () => {
             width: 900,
             padding: 0,
             borderRadius: 12,
-            backgroundColor: "#f2f2fd",
+            backgroundColor: "#E8F0F8",
             boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
           }}
         >
           <div style={{ display: "flex", flexWrap: "wrap" }}>
             {/* Left Section - Form */}
             <div style={{ flex: 1, padding: "40px 32px" }}>
-              <Title level={3} style={{ color: "#2D1A5B", marginBottom: 0 }}>
+              <Title level={3} style={{ color: "#45629bff", marginBottom: 0 }}>
                 {/* <img  src="https://cdn-icons-png.flaticon.com/128/295/295128.png" className="px-8" width={40}/> */}
                 Welcome Back To Your Dashboard
               </Title>
               <Text type="secondary" className="mt-8">
-                Login to your Ryzo account
+                Login to your HiveChat account
               </Text>
 
               <Form
@@ -116,26 +116,27 @@ const Login = () => {
 
                 <Form.Item>
                   <Button
-                    type="primary"
+                    // type="primary"
                     htmlType="submit"
                     size="large"
                     block
-                    style={{
-                      backgroundColor: "#2D1A5B",
-                      borderColor: "#2D1A5B",
-                    }}
+                    className="btn btn-dark mx-4"
+                    // style={{
+                    //   backgroundColor: "#2D1A5B",
+                    //   borderColor: "#2D1A5B",
+                    // }}
                   >
                     Login
                   </Button>
                 </Form.Item>
 
                 <Text type="secondary">
-                  New to Ryzo?{" "}
+                  New to HiveChat?{" "}
                   <span
                     onClick={() => navigate("/register")}
                     style={{
                       textDecoration: "underline",
-                      color: "#2D1A5B",
+                      color: "#45629bff",
                       cursor: "pointer",
                     }}
                   >
@@ -158,7 +159,7 @@ const Login = () => {
               }}
             >
               <img
-                src="5516.png"
+                src="/Signup-amico.png"
                 alt="Login Illustration"
                 style={{ width: "100%" }}
               />

@@ -8,6 +8,10 @@ import {
   Tabs,
   Select,
   notification,
+  Upload,
+  Button,
+  Row,
+  Col,
 } from "antd";
 import {
   LockOutlined,
@@ -16,6 +20,7 @@ import {
   EyeTwoTone,
   InfoCircleOutlined,
   UsergroupAddOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import "../../Css/CreateNJoinRoom.css";
 import {
@@ -25,11 +30,14 @@ import {
 } from "../../Services/RoomService";
 import { useSelector } from "react-redux";
 import { userData } from "../../store/authSlice";
-
+import * as signalR from "@microsoft/signalr";
 const { TextArea } = Input;
 const { Text } = Typography;
-
-const CreateNJoinRoom: React.FC = () => {
+interface ChatComponentProps {
+  connection: signalR.HubConnection | null;
+  // selectedRoom: any;
+}
+const CreateNJoinRoom: React.FC<ChatComponentProps> = ({ connection }) => {
   const [form] = Form.useForm();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -42,7 +50,7 @@ const CreateNJoinRoom: React.FC = () => {
   const userInfo = useSelector(userData);
   const CreateRoomMutation = useCreateRoom(userInfo?.id);
   const { data: avaliableRoom } = useGetAvaliableRoom(userInfo?.id);
-  const  JoinRoomMutation  = useJoinRoom(userInfo?.id);
+  const JoinRoomMutation = useJoinRoom(userInfo?.id);
 
   const [api, contextHolder] = notification.useNotification();
 
@@ -76,15 +84,32 @@ const CreateNJoinRoom: React.FC = () => {
 
     try {
       if (isJoinRoom === "create") {
-        const data = await CreateRoomMutation.mutateAsync(finalData);
-        if (data?.status === false) {
-          api.error({
-            message: `${data?.message}`,
-          });
-        } else {
-          api.success({ message: `"${data.result.name}" ${data?.message}` });
-        }
-        handleCancel();
+        //  await CreateRoomMutation.mutateAsync(formData as any);
+        await CreateRoomMutation.mutateAsync({
+          Name: values.roomName,
+          IsPrivate: roomType === "private",
+          Password: values.password || null,
+          Description: values.description || "",
+          UserId: userInfo.id,
+          UserName: userInfo.name,
+          RoomImage: values.roomImage,
+        }).then((data: any) => {
+          if (data?.status === false) {
+            api.error({ message: `${data?.message}` });
+          } else {
+            api.success({ message: `${data?.message}` });
+            handleCancel();
+          }
+        });
+
+        // if (data?.status === false) {
+        //   api.error({
+        //     message: `${data?.message}`,
+        //   });
+        // } else {
+        //   api.success({ message: `"${data.result.name}" ${data?.message}` });
+        // }
+        // handleCancel();
       } else {
         if (!selectedJoinRoomId) {
           api.error({ message: "Please select a room to join." });
@@ -106,10 +131,18 @@ const CreateNJoinRoom: React.FC = () => {
           api.error({ message: `${data?.message}` });
         } else {
           api.success({ message: `${data?.message}` });
+          //     if (connection && connection.state === "Connected") {
+          //   await connection.invoke(
+          //     "JoinRoom",
+          //     selectedJoinRoomId,
+          //     userInfo?.id,
+          //     userInfo?.name
+          //   );
+          // }
+
+          handleCancel();
         }
       }
-
-      handleCancel();
     } catch (error: any) {
       api.error({
         message: `${error?.message} ` || "Please try again",
@@ -121,43 +154,80 @@ const CreateNJoinRoom: React.FC = () => {
 
   const renderExtraFields = () => (
     <>
-      <Form.Item
-        label={
-          <>
-            Room Name{" "}
-            <Tooltip title="Name must be unique" className="mx-8">
-              <InfoCircleOutlined />
-            </Tooltip>
-          </>
-        }
-        name="roomName"
-        rules={[{ required: true, message: "Please enter a room name" }]}
-      >
-        {isJoinRoom !== "join" ? (
-          <Input placeholder="Enter room name" />
-        ) : (
-          <Select
-            showSearch
-            onClick={(e: any) => setFilterRoom(e)}
-            onChange={(e: any) => {
-              setSelectedJoinRoomId(e);
-              e.target.value === "" ? setSelectedJoinRoomId(undefined) : null;
-            }}
-            allowClear
-            placeholder="Search to Select"
-            optionFilterProp="label"
-            filterSort={(optionA, optionB) =>
-              String(optionA?.label ?? "")
-                .toLowerCase()
-                .localeCompare(String(optionB?.label ?? "").toLowerCase())
+      <Row gutter={[8, 4]}>
+        <Col span={isJoinRoom === "create" ? 22 : 24}>
+          <Form.Item
+            label={
+              <>
+                Room Name{" "}
+                <Tooltip title="Name must be unique" className="mx-8">
+                  <InfoCircleOutlined />
+                </Tooltip>
+              </>
             }
-            options={avaliableRoom?.map((room: any) => ({
-              value: room.id,
-              label: room.name,
-            }))}
-          />
+            name="roomName"
+            rules={[{ required: true, message: "Please enter a room name" }]}
+          >
+            {isJoinRoom !== "join" ? (
+              <Input placeholder="Enter room name" />
+            ) : (
+              <Select
+                showSearch
+                onClick={(e: any) => setFilterRoom(e)}
+                onChange={(e: any) => {
+                  setSelectedJoinRoomId(e);
+                  e.target.value === ""
+                    ? setSelectedJoinRoomId(undefined)
+                    : null;
+                }}
+                allowClear
+                placeholder="Search to Select"
+                optionFilterProp="label"
+                filterSort={(optionA, optionB) =>
+                  String(optionA?.label ?? "")
+                    .toLowerCase()
+                    .localeCompare(String(optionB?.label ?? "").toLowerCase())
+                }
+                options={avaliableRoom?.map((room: any) => ({
+                  value: room.id,
+                  label: room.name,
+                }))}
+              />
+            )}
+          </Form.Item>
+        </Col>
+        {isJoinRoom === "create" && (
+          <Col>
+            <Form.Item
+              name="roomImage"
+              className="mt-30"
+              valuePropName="file"
+              getValueFromEvent={(e) => {
+                if (Array.isArray(e)) {
+                  return e;
+                }
+                return e?.fileList?.[0]?.originFileObj;
+              }}
+            >
+              <Upload
+                showUploadList={false}
+                beforeUpload={() => {
+                  // UploadFileMutation.mutate({
+                  //   file,
+                  //   roomId: selectedRoom.id,
+                  //   roomName: selectedRoom.name,
+                  //   userId: userInfo.id,
+                  //   userName: userInfo.name,
+                  // });
+                  return false;
+                }}
+              >
+                <Button icon={<UploadOutlined />}></Button>
+              </Upload>
+            </Form.Item>
+          </Col>
         )}
-      </Form.Item>
+      </Row>
 
       {roomType === "private" && (
         <Form.Item
@@ -203,7 +273,7 @@ const CreateNJoinRoom: React.FC = () => {
         cancelText="Cancel"
         confirmLoading={loading}
         centered
-        className="ryzo-room-modal"
+        className="hivechat-room-modal"
       >
         <Tabs
           activeKey={isJoinRoom}

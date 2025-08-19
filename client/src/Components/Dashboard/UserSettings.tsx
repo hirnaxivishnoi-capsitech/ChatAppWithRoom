@@ -14,6 +14,9 @@ import {
   Tooltip,
   Card,
   Popconfirm,
+  Row,
+  Col,
+  Empty,
 } from "antd";
 import {
   UserOutlined,
@@ -25,6 +28,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   UsergroupAddOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import "../../Css/UserSettings.css";
 import { useSelector } from "react-redux";
@@ -110,10 +114,16 @@ const UserSettings: React.FC<UserSettingsProps> = ({ connection }) => {
     });
   };
 
-  const handleLeaveRoom = async (roomId: string) => {
-    if (connection?.state === "Connected" && roomId && userInfo?.id) {
+  const handleLeaveRoom = async (room: any) => {
+    if (connection?.state === "Connected" && room?.id && userInfo?.id) {
       try {
-        await connection.invoke("LeaveRoom", roomId, userInfo?.id);
+        await connection.invoke(
+          "LeaveRoom",
+          room?.id,
+          room?.name,
+          userInfo?.id,
+          userInfo?.name
+        );
 
         api.success({
           message: `You left the room successfully.`,
@@ -141,128 +151,146 @@ const UserSettings: React.FC<UserSettingsProps> = ({ connection }) => {
   }, [UserDetail, form]);
 
   const renderProfileSection = () => (
-    <>
-      <div className="profile-header">
-        <Badge
-          dot
-          status="success"
-          offset={[-4, 28]}
-          style={{ padding: "3px" }}
-        >
-          <Avatar size={48} style={{ backgroundColor: "#7265e6" }}>
-            {userInfo?.name?.charAt(0).toUpperCase()}
-          </Avatar>
-        </Badge>
-
-        <div className="user-info">
-          <Text strong style={{ fontSize: "1.1rem" }}>
-            {userInfo?.name}
-          </Text>
-          <Text type="secondary" style={{ marginTop: 2 }}>
-            {userInfo?.email}
-          </Text>
+    <div className="content-section fade-in">
+      <Title level={4}>Profile Settings</Title>
+      <Divider />
+      <Card bordered={false} className="setting-card profile-card">
+        <div className="profile-header">
+          <Badge status="success" offset={[-4, 28]}>
+            <Avatar
+              size={64}
+              style={{ backgroundColor: "#E9F0F8", color: "#45629B" }}
+            >
+              {userInfo?.name?.charAt(0).toUpperCase()}
+            </Avatar>
+          </Badge>
+          <div className="user-info">
+            <Title level={4} style={{ margin: 0 }}>
+              {userInfo?.name}
+            </Title>
+            <Text type="secondary">{userInfo?.email}</Text>
+          </div>
+          <Button
+            type="text"
+            icon={<EditOutlined />}
+            onClick={() => setIsEditing(!isEditing)}
+            className="edit-profile-btn"
+          >
+            {isEditing ? "Cancel Edit" : "Edit Profile"}
+          </Button>
         </div>
-
-        <Button
-          icon={<EditOutlined />}
-          type="text"
-          style={{
-            position: "absolute",
-            top: "50%",
-            right: 16,
-            transform: "translateY(-50%)",
-          }}
-          onClick={() => setIsEditing(!isEditing)}
+        <Form
+          form={form}
+          layout="vertical"
+          style={{ maxWidth: 500, marginTop: "24px" }}
+          onFinish={handleSaveProfile}
         >
-          {isEditing ? "Cancel" : "Edit Profile"}
-        </Button>
-      </div>
-      <Form
-        form={form}
-        layout="vertical"
-        style={{ maxWidth: 500 }}
-        className="mt-24"
-        onFinish={handleSaveProfile}
-      >
-        <Form.Item label="Display Name" name="name">
-          <Input disabled={!isEditing} />
-        </Form.Item>
-        <Form.Item label="Email" name="email">
-          <Input disabled={!isEditing} />
-        </Form.Item>
-        <Form.Item label="Status Message" name="status">
-          <Input disabled={!isEditing} placeholder="What's your status?" />
-        </Form.Item>
-      </Form>
-    </>
+          <Form.Item
+            label="Display Name"
+            name="name"
+            rules={[{ required: true, message: "Please enter your name!" }]}
+          >
+            <Input disabled={!isEditing} />
+          </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              {
+                required: true,
+                type: "email",
+                message: "Please enter a valid email!",
+              },
+            ]}
+          >
+            <Input disabled={!isEditing} />
+          </Form.Item>
+          {/* <Form.Item label="Status Message" name="status">
+            <Input disabled={!isEditing} placeholder="What's on your mind?" />
+          </Form.Item> */}
+          {isEditing && (
+            <Form.Item>
+              <Button type="primary" htmlType="submit" loading={loading} block>
+                Save Changes
+              </Button>
+            </Form.Item>
+          )}
+        </Form>
+      </Card>
+    </div>
   );
-
   const renderYourRoomsSection = () => (
-    <>
-      <Title level={4} style={{ marginBottom: 12 }}>
-        Manage Rooms
-      </Title>
-      <Divider style={{ margin: "0 0 24px 0" }} />
-      {YourRooms && YourRooms.length > 0 ? (
-        <div
-          className="room-list-container"
-          style={{
-            height: "350px",
-            overflowY: "scroll",
-            padding: "20px",
-          }}
-        >
-          {YourRooms?.map((room: any) => (
-            <Card
-              key={room?.id}
-              className="room-card"
-              style={{ marginBottom: "20px" }}
-              title={
-                <div className="d-flex">
-                  <div
-                    style={{ display: "flex", alignItems: "center", gap: 10 }}
-                  >
-                    {room?.privacy === "Private" ? (
-                      <LockOutlined
-                        style={{ fontSize: 20, color: "#ef4444" }}
-                      />
-                    ) : (
-                      <UnlockOutlined
-                        style={{ fontSize: 20, color: "#22c55e" }}
-                      />
-                    )}
-                    <Text strong style={{ fontSize: "1.1rem" }}>
-                      {room?.name}
-                    </Text>
-                  </div>
-                  <Tooltip title="Leave Room">
-                    <Button
-                      type="text"
-                      icon={
-                        <LogoutOutlined
-                          style={{ color: "#22c55e" }}
-                          onClick={() => handleLeaveRoom(room?.id)}
-                        />
+    <div>
+      <div className="content-section fade-in">
+        <Title level={4}>Manage Rooms</Title>
+        <Divider />
+        <div className="room-list-container">
+          <Row gutter={[24, 24]}>
+            {YourRooms && YourRooms.length > 0 ? (
+              <>
+                {YourRooms?.map((room: any) => (
+                  <Col xs={24} sm={12} md={12} key={room?.id}>
+                    <Card
+                      // key={room?.id}
+                      className="room-card"
+                      style={{ marginBottom: "20px" }}
+                      title={
+                        <div className="d-flex">
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                            }}
+                          >
+                            {room?.privacy === "Private" ? (
+                              <LockOutlined
+                                style={{ fontSize: 20, color: "#ef4444" }}
+                              />
+                            ) : (
+                              <UnlockOutlined
+                                style={{ fontSize: 20, color: "#22c55e" }}
+                              />
+                            )}
+                            <Text
+                              strong
+                              ellipsis={true}
+                              style={{ fontSize: "1.1rem" }}
+                              className="room-name"
+                            >
+                              {room?.name}
+                            </Text>
+                          </div>
+                          <Tooltip title="Leave Room">
+                            <Button
+                              type="text"
+                              icon={
+                                <LogoutOutlined
+                                  style={{ color: "#22c55e" }}
+                                  onClick={() => handleLeaveRoom(room)}
+                                />
+                              }
+                            />
+                          </Tooltip>
+                        </div>
                       }
-                    />
-                  </Tooltip>
-                </div>
-              }
-              extra={
-                room?.CreatorId === userInfo?.id && (
-                  <>
-                    <Popconfirm
-                      title="Delete this room?"
-                      description="Are you sure you want to delete this room? This action cannot be undone."
-                      onConfirm={() => handleDeleteRoom(room)}
-                      okText="Yes"
-                      okButtonProps={{ danger: true }}
-                      cancelText="Cancel"
-                      placement="topRight"
-                    >
-                      <Button type="text" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>
-                    {/* <Tooltip title="Delete Room">
+                      extra={
+                        room?.CreatorId === userInfo?.id && (
+                          <>
+                            <Popconfirm
+                              title="Delete this room?"
+                              description="Are you sure you want to delete this room? This action cannot be undone."
+                              onConfirm={() => handleDeleteRoom(room)}
+                              okText="Yes"
+                              okButtonProps={{ danger: true }}
+                              cancelText="Cancel"
+                              placement="top"
+                            >
+                              <div className="dropdown-action-item danger">
+                                <DeleteOutlined />
+                              </div>
+                            </Popconfirm>
+                            {/* <Tooltip title="Delete Room">
                       <Button
                         type="text"
                         danger
@@ -273,7 +301,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ connection }) => {
                       />
                     </Tooltip> */}
 
-                    {/* <Modal 
+                            {/* <Modal 
                       title="Delete this room?"
                       open={isDeleteModalVisible}
                       onOk={() => {
@@ -294,93 +322,196 @@ const UserSettings: React.FC<UserSettingsProps> = ({ connection }) => {
                         associated with it will be permanently removed.
                       </p>
                     </Modal> */}
-                  </>
-                )
-              }
-            >
-              <div
-                style={{
-                  marginBottom: 16,
-                  fontSize: "0.85rem",
-                  color: "#8c8c8c",
-                }}
-              >
-                <span style={{ color: "#595959", fontWeight: "600" }}>
-                  {room?.createdBy}
-                </span>
-                <span style={{ margin: "0 6px" }}>•</span>
-                <span>{dayjs(room?.createdAt).format("MMMM D, YYYY")}</span>
-              </div>
-              <Text
-                type="secondary"
-                style={{
-                  fontStyle: room?.description ? "normal" : "italic",
-                  display: "block",
-                  marginBottom: 16,
-                }}
-              >
-                {room?.description || "No description provided."}
-              </Text>
-              <Divider style={{ margin: "8px 0" }} />
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  {room?.membersName?.slice(0, 6).map((name: any, i: any) => {
-                    const colors = [
-                      "#FF6B6B",
-                      "#4ECDC4",
-                      "#FFD93D",
-                      "#6A4C93",
-                      "#1A535C",
-                      "#FF9F1C",
-                    ];
-                    return (
-                      <Tooltip key={i} title={name}>
-                        <Avatar
+                          </>
+                        )
+                      }
+                    >
+                      <div
+                        style={{
+                          marginBottom: 16,
+                          fontSize: "0.85rem",
+                          color: "#8c8c8c",
+                        }}
+                      >
+                        <span style={{ color: "#595959", fontWeight: "600" }}>
+                          {room?.createdBy}
+                        </span>
+                        <span style={{ margin: "0 6px" }}>•</span>
+                        <span>
+                          {dayjs(room?.createdAt).format("MMMM D, YYYY")}
+                        </span>
+                      </div>
+                      <Text
+                        type="secondary"
+                        style={{
+                          fontStyle: room?.description ? "normal" : "italic",
+                          display: "block",
+                          marginBottom: 16,
+                        }}
+                      >
+                        {room?.description || "No description provided."}
+                      </Text>
+                      <Divider style={{ margin: "8px 0" }} />
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          {room?.membersName
+                            ?.slice(0, 6)
+                            .map((name: any, i: any) => {
+                              const colors = [
+                                "#FF6B6B",
+                                "#4ECDC4",
+                                "#FFD93D",
+                                "#6A4C93",
+                                "#1A535C",
+                                "#FF9F1C",
+                              ];
+                              return (
+                                <Tooltip key={i} title={name}>
+                                  <Avatar
+                                    style={{
+                                      backgroundColor:
+                                        colors[i % colors.length],
+                                      border: "2px solid white",
+                                      marginLeft: i === 0 ? 0 : -10,
+                                      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                                    }}
+                                  >
+                                    {name.charAt(0).toUpperCase()}
+                                  </Avatar>
+                                </Tooltip>
+                              );
+                            })}
+                          {room?.membersName?.length > 6 && (
+                            <Avatar
+                              style={{
+                                backgroundColor: "#ccc",
+                                marginLeft: -10,
+                              }}
+                            >
+                              +{room?.membersName?.length - 6}
+                            </Avatar>
+                          )}
+                        </div>
+                        <div
                           style={{
-                            backgroundColor: colors[i % colors.length],
-                            border: "2px solid white",
-                            marginLeft: i === 0 ? 0 : -10,
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
                           }}
                         >
-                          {name.charAt(0).toUpperCase()}
-                        </Avatar>
-                      </Tooltip>
-                    );
-                  })}
-                  {room?.membersName?.length > 6 && (
-                    <Avatar
+                          <UsergroupAddOutlined style={{ color: "#8c8c8c" }} />
+                          <Text type="secondary" strong>
+                            {room?.totalMembers} members
+                          </Text>
+                        </div>
+                      </div>
+                    </Card>
+                  </Col>
+                ))}
+              </>
+            ) : (
+              <Col span={24}>
+                <Text type="secondary">
+                  You haven't created or joined any rooms yet. Start by creating
+                  one!
+                </Text>
+              </Col>
+            )}
+          </Row>
+        </div>
+      </div>
+    </div>
+  );
+  const renderHistorySection = () => (
+    <div>
+      <Title level={5} style={{ color: "#45629B" }}>
+        {YourRooms?.length > 0 &&
+          `Deleted Room (${
+            YourRooms?.filter((room: any) => room.isDeleted === true).length
+          })`}
+      </Title>
+      {YourRooms?.filter((x:any) => x.isDeleted == true).length > 0 ? (
+        <>
+          <Text type="secondary" style={{ marginBottom: 16 }}>
+            Here are the rooms you have deleted. You can no longer access these.
+          </Text>
+          <Menu
+            mode="inline"
+            style={{
+              border: "none",
+              padding: "8px",
+              maxHeight: "600px",
+              overflowY: "scroll",
+              backgroundColor: "transparent",
+              scrollbarWidth: "none",
+            }}
+          >
+            {YourRooms?.filter((val: any) => val.isDeleted === true).map(
+              (val: any, index: number) => (
+                <Menu.Item
+                  key={index}
+                  style={{
+                    padding: "12px",
+                    marginBottom: "8px",
+                    borderRadius: "8px",
+                    backgroundColor: "#fff",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <div>
+                    <div
                       style={{
-                        backgroundColor: "#ccc",
-                        marginLeft: -10,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: "4px",
                       }}
                     >
-                      +{room?.membersName?.length - 6}
-                    </Avatar>
-                  )}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <UsergroupAddOutlined style={{ color: "#8c8c8c" }} />
-                  <Text type="secondary" strong>
-                    {room?.totalMembers} members
-                  </Text>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+                      <span style={{ fontSize: 15, fontWeight: 600 }}>
+                        {val?.name}
+                      </span>
+                      {val?.privacy === "Private" ? (
+                        <LockOutlined
+                          style={{ color: "#ff7875", fontSize: 14 }}
+                        />
+                      ) : (
+                        <UnlockOutlined
+                          style={{ color: "#52c41a", fontSize: 14 }}
+                        />
+                      )}
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: 12,
+                        color: "#999",
+                      }}
+                    >
+                      <span>{val?.description} </span>
+                      <span>{val?.createdBy}</span>
+                    </div>
+                  </div>
+                </Menu.Item>
+              )
+            )}
+          </Menu>
+        </>
       ) : (
-        <Text type="secondary">
-          You haven't created any rooms yet. Start by creating one!
-        </Text>
+        <Empty style={{ marginTop: 50 }}
+          description="No deleted rooms found."
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
       )}
-    </>
+    </div>
   );
 
   return (
@@ -394,28 +525,27 @@ const UserSettings: React.FC<UserSettingsProps> = ({ connection }) => {
       </Tooltip>
       <Modal
         open={open}
-        title={
-          <Title level={4} style={{ margin: 0 }}>
-            Profile
-          </Title>
-        }
         onCancel={handleCancel}
         centered
         width={900}
+        wrapClassName="user-settings-modal"
         footer={[
-          isEditing && (
-            <Button
-              key="submit"
-              type="primary"
-              loading={loading}
-              onClick={() => form.submit()}
-            >
-              Save Changes
+          <div style={{ padding: "0 24px 24px" }}>
+            {isEditing && (
+              <Button
+                key="submit"
+                type="primary"
+                loading={loading}
+                onClick={() => form.submit()}
+                className="mr-16"
+              >
+                Save Changes
+              </Button>
+            )}
+            <Button key="back" onClick={handleCancel}>
+              Close
             </Button>
-          ),
-          <Button key="back" onClick={handleCancel}>
-            Close
-          </Button>,
+          </div>,
         ]}
       >
         <Layout className="user-settings-layout">
@@ -433,15 +563,17 @@ const UserSettings: React.FC<UserSettingsProps> = ({ connection }) => {
               <Menu.Item key="2" icon={<FileImageOutlined />}>
                 Manage Rooms
               </Menu.Item>
+              <Menu.Item key="3" icon={<HistoryOutlined />}>
+                History
+              </Menu.Item>
             </Menu>
 
-            {/* A separate menu for the sign-out button */}
             <div className="sign-out-menu">
               <Menu
                 mode="inline"
                 onClick={handleLogout}
-                className="settings-menu"
-                style={{ border: "none" }}
+                // className="settings-menu"
+                style={{ border: "none", fontWeight: "500" }}
               >
                 <Menu.Item key="3" icon={<LogoutOutlined />} danger>
                   Sign Out
@@ -454,6 +586,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ connection }) => {
             <Content className="settings-content">
               {selectedMenuKey === "1" && renderProfileSection()}
               {selectedMenuKey === "2" && renderYourRoomsSection()}
+              {selectedMenuKey === "3" && renderHistorySection()}
             </Content>
           </Layout>
         </Layout>

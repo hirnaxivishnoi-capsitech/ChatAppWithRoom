@@ -11,6 +11,7 @@ import {
   notification,
   Row,
   Col,
+  Space,
 } from "antd";
 import {
   LockOutlined,
@@ -52,6 +53,8 @@ const SidebarLayout: React.FC = () => {
     null
   );
   const [api, contextHolder] = notification.useNotification();
+  const [showMembers, setShowMembers] = useState(false);
+
   const handleClick = (room: any) => {
     setSelectedRoom(room);
   };
@@ -61,7 +64,12 @@ const SidebarLayout: React.FC = () => {
     setPreviewModal(true);
   };
 
-  const handleJoinRoom = () => {};
+  // const handleJoinRoom = () => {};
+
+  const handleJoinRoom = (room: any) => {
+    setSelectedRoom(room);
+    setPreviewModal(false);
+  };
 
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
@@ -102,10 +110,16 @@ const SidebarLayout: React.FC = () => {
   //   }
   // };
 
-  const handleLeaveRoom = async (roomId: string) => {
-    if (connection?.state === "Connected" && roomId && userInfo?.id) {
+  const handleLeaveRoom = async (slectedRoom: any) => {
+    if (connection?.state === "Connected" && slectedRoom?.id && userInfo?.id) {
       try {
-        await connection.invoke("LeaveRoom", roomId, userInfo?.id);
+        await connection.invoke(
+          "LeaveRoom",
+          slectedRoom?.id,
+          slectedRoom?.name,
+          userInfo?.id,
+          userInfo?.name
+        );
 
         api.success({
           message: `You left the room successfully.`,
@@ -137,17 +151,33 @@ const SidebarLayout: React.FC = () => {
 
   const handleMenuClick = (e: any) => {
     if (e.key === "1" && selectedRoom?.id) {
-      handleLeaveRoom(selectedRoom.id);
+      handleLeaveRoom(selectedRoom);
     }
   };
 
+  // useEffect(() => {
+  //   if (YourRooms?.length > 0) {
+  //     setSelectedRoom(YourRooms[0]);
+  //   } else if (AvailableRooms?.length > 0) {
+  //     //  setSelectedRoom(AvailableRooms[0])
+  //   }
+  // }, [searchRoom, YourRooms]);
+
   useEffect(() => {
-    if (YourRooms?.length > 0) {
+    if (!selectedRoom && YourRooms?.length > 0) {
       setSelectedRoom(YourRooms[0]);
-    } else if (AvailableRooms?.length > 0) {
-      //  setSelectedRoom(AvailableRooms[0])
     }
-  }, [searchRoom, YourRooms]);
+
+    if (searchRoom) {
+      setSelectedRoom(
+        YourRooms?.find((room: any) =>
+          room.name.toLowerCase().includes(searchRoom.toLowerCase())
+        ) || null
+      );
+    }
+  }, [searchRoom, YourRooms, selectedRoom]);
+
+  console.log("Rooms", YourRooms);
 
   return (
     <>
@@ -156,16 +186,32 @@ const SidebarLayout: React.FC = () => {
         <Sider
           width={300}
           style={{
-            background: "white",
-            //  background: "linear-gradient(135deg, #f9f9f9, #e6ecff)",
-            borderRight: "1px solid #eee",
+            borderRight: "2px solid #D5E1F0",
+            background: "linear-gradient(180deg, #E8F0F8, #F8FAFF)",
+            overflowY: "auto",
+            scrollbarWidth: "none",
           }}
         >
           <div className="p-8">
-            <div className="d-center ">
-              <img src="/Logo.png" alt="Logo" width={40} />
-              <span className="fs-24 darkLevandar" style={{ fontWeight: 800 }}>
-                Ryzo
+            <div className="d-center">
+              <img
+                src="/HiveChatLogo.png"
+                alt="Hive Logo"
+                width={41.8}
+                // style={{ marginRight: "12px" }}
+              />
+              <span
+                className=""
+                style={{
+                  fontSize: "24px",
+                  fontWeight: 800,
+                  background: "linear-gradient(40deg, #8e45abff, #6AC4FA)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  fontFamily: "Poppins",
+                }}
+              >
+                HiveChat
               </span>
             </div>
           </div>
@@ -173,8 +219,15 @@ const SidebarLayout: React.FC = () => {
           <div className="d-flex px-8">
             <div className="d-flex">
               <Avatar
-                className="mr-8 darkLevandarBg"
-                style={{ backgroundColor: "" }}
+                className="mr-8"
+                size={40}
+                style={{
+                  backgroundColor: "#fff",
+                  color: "#1D3557",
+                  fontWeight: "500",
+                  border: "2px solid #E0EAFC",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                }}
               >
                 {userInfo?.name?.charAt(0).toUpperCase()}
               </Avatar>
@@ -208,12 +261,16 @@ const SidebarLayout: React.FC = () => {
                 <Col>
                   <Title level={5}>
                     {YourRooms?.length > 0
-                      ? `Your Rooms (${YourRooms?.length})`
+                      ? `Your Rooms (${
+                          YourRooms?.filter(
+                            (room: any) => room.isDeleted === false
+                          ).length
+                        })`
                       : "Create or Join Room"}
                   </Title>
                 </Col>
                 <Col>
-                  <CreateNJoinRoom />
+                  <CreateNJoinRoom connection={connection} />
                 </Col>
               </Row>
 
@@ -224,9 +281,9 @@ const SidebarLayout: React.FC = () => {
                   style={{
                     border: "none",
                     padding: "8px",
-                    height: AvailableRooms?.length > 0 ? 150 : 300,
+                    maxHeight: "300px",
                     overflowY: "scroll",
-                    // backgroundColor: "#",
+                    backgroundColor: "transparent",
                     scrollbarWidth: "none",
                   }}
                 >
@@ -238,51 +295,107 @@ const SidebarLayout: React.FC = () => {
                       Failed to load rooms
                     </div>
                   )}
-                  {YourRooms?.map((val: any, index: number) => (
+                  {YourRooms?.filter(
+                    (val: any) => val?.isDeleted === false
+                  ).map((val: any, index: number) => (
                     <Menu.Item
                       onClick={() => handleClick(val)}
                       key={index}
+                      // style={{
+                      //   padding: "12px",
+                      //   marginBottom: "8px",
+                      //   borderRadius: "8px",
+                      //   backgroundColor: "#fff",
+                      //   boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                      //   transition: "all 0.2s",
+                      // }}
                       style={{
-                        padding: "12px",
-                        marginBottom: "8px",
-                        borderRadius: "8px",
-                        backgroundColor: "#fff",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-                        transition: "all 0.2s",
+                        padding: "28px 16px 28px 5px",
+                        marginBottom: "12px",
+                        borderRadius: "6px",
+                        backgroundColor:
+                          selectedRoom?.id === val.id ? "#E6F4FF" : "#FFFFFF",
+                        boxShadow:
+                          selectedRoom?.id === val.id
+                            ? "0 4px 12px rgba(42, 157, 143, 0.15)"
+                            : "0 2px 8px rgba(0,0,0,0.05)",
+                        transition: "all 0.3s ease",
+                        transform:
+                          selectedRoom?.id === val.id
+                            ? "scale(1.02)"
+                            : "scale(1)",
+                        borderLeft:
+                          selectedRoom?.id === val.id
+                            ? "4px solid #45629bff"
+                            : "none",
+                        position: "relative",
+                        color:
+                          selectedRoom?.id === val.id ? "#45629bff" : "black",
                       }}
                     >
-                      <div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            marginBottom: "4px",
-                          }}
-                        >
-                          <span style={{ fontSize: 15, fontWeight: 600 }}>
-                            {val?.name}
-                          </span>
-                          {val?.privacy === "Private" ? (
-                            <LockOutlined
-                              style={{ color: "#ff7875", fontSize: 14 }}
+                      <div className="d-flex">
+                        <div className="d-center">
+                          {val?.roomImage ? (
+                            <img
+                              src={val?.roomImage}
+                              // alt="Hive Logo"
+                              style={{
+                                width: "35px",
+                                height: "35px",
+                                borderRadius: "50%",
+                                objectFit: "cover",
+                              }}
                             />
                           ) : (
-                            <UnlockOutlined
-                              style={{ color: "#52c41a", fontSize: 14 }}
-                            />
+                            <Avatar
+                              // className="mr-8"
+                              size={40}
+                              style={{
+                                backgroundColor: "#fff",
+                                color: "#1D3557",
+                                fontWeight: "500",
+                                border: "2px solid #E0EAFC",
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                              }}
+                            >
+                              {val?.name?.charAt(0).toUpperCase()}
+                            </Avatar>
                           )}
-                        </div>
 
+                          {/* {val?.name?.charAt(0).toUpperCase()} */}
+                          <span
+                            className="ml-8"
+                            style={{ fontSize: 15, fontWeight: 600 }}
+                          >
+                            {val?.name}
+                          </span>
+                        </div>
                         <div
                           style={{
                             display: "flex",
+                            flexDirection: "column",
                             justifyContent: "space-between",
                             fontSize: 12,
                             color: "#999",
                           }}
                         >
-                          <span>{val?.totalMembers} members</span>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "flex-end",
+                            }}
+                          >
+                            {val?.privacy === "Private" ? (
+                              <LockOutlined
+                                style={{ color: "#ff7875", fontSize: 14 }}
+                              />
+                            ) : (
+                              <UnlockOutlined
+                                style={{ color: "#52c41a", fontSize: 14 }}
+                              />
+                            )}
+                          </div>
+                          {/* <span>{val?.totalMembers} members</span> */}
                           <span>{val?.createdBy}</span>
                         </div>
                       </div>
@@ -300,7 +413,11 @@ const SidebarLayout: React.FC = () => {
             <div className="px-8">
               <Title level={5}>
                 {AvailableRooms?.length > 0 &&
-                  `Available Rooms (${AvailableRooms?.length})`}
+                  `Available Rooms (${
+                    AvailableRooms?.filter(
+                      (room: any) => room.isDeleted === false
+                    ).length
+                  })`}
               </Title>
 
               <Menu
@@ -308,10 +425,11 @@ const SidebarLayout: React.FC = () => {
                 style={{
                   border: "none",
                   padding: "8px",
-                  height: AvailableRooms?.length > 0 ? 150 : 0,
+                  maxHeight: "200px",
                   overflowY: "scroll",
-                  // backgroundColor: "#",
+                  backgroundColor: "transparent",
                   scrollbarWidth: "none",
+                  //   height: AvailableRooms?.length > 0 ? 150 : 0,
                 }}
               >
                 {AvailableRooms?.map((val: any, index: number) => (
@@ -327,38 +445,69 @@ const SidebarLayout: React.FC = () => {
                       transition: "all 0.2s",
                     }}
                   >
-                    <div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        <span style={{ fontSize: 15, fontWeight: 600 }}>
-                          {val?.name}
-                        </span>
-                        {val?.privacy === "Private" ? (
-                          <LockOutlined
-                            style={{ color: "#ff7875", fontSize: 14 }}
+                    <div className="d-flex">
+                      <div className="d-center">
+                        {val?.roomImage ? (
+                          <img
+                            src={val?.roomImage}
+                            // alt="Hive Logo"
+                            style={{
+                              width: "35px",
+                              height: "35px",
+                              borderRadius: "50%",
+                              objectFit: "cover",
+                            }}
                           />
                         ) : (
-                          <UnlockOutlined
-                            style={{ color: "#52c41a", fontSize: 14 }}
-                          />
+                          <Avatar
+                            // className="mr-8"
+                            size={40}
+                            style={{
+                              backgroundColor: "#fff",
+                              color: "#1D3557",
+                              fontWeight: "500",
+                              border: "2px solid #E0EAFC",
+                              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                            }}
+                          >
+                            {val?.name?.charAt(0).toUpperCase()}
+                          </Avatar>
                         )}
-                      </div>
 
+                        {/* {val?.name?.charAt(0).toUpperCase()} */}
+                        <span
+                          className="ml-8"
+                          style={{ fontSize: 15, fontWeight: 600 }}
+                        >
+                          {val?.name}
+                        </span>
+                      </div>
                       <div
                         style={{
                           display: "flex",
+                          flexDirection: "column",
                           justifyContent: "space-between",
                           fontSize: 12,
                           color: "#999",
                         }}
                       >
-                        <span>{val?.totalMembers} members</span>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          {val?.privacy === "Private" ? (
+                            <LockOutlined
+                              style={{ color: "#ff7875", fontSize: 14 }}
+                            />
+                          ) : (
+                            <UnlockOutlined
+                              style={{ color: "#52c41a", fontSize: 14 }}
+                            />
+                          )}
+                        </div>
+                        {/* <span>{val?.totalMembers} members</span> */}
                         <span>{val?.createdBy}</span>
                       </div>
                     </div>
@@ -374,73 +523,59 @@ const SidebarLayout: React.FC = () => {
           <Header
             style={{
               backgroundColor: "#fff",
-              padding: "5px 20px",
+              padding: "0 20px",
+              height: 64, // Default Antd Header height
               borderBottom: "1px solid #eee",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
-            className="d-flex"
           >
-            <div>
-              <Title level={4} style={{ margin: 0, display: "flex" }}>
-                {selectedRoom?.name ?? "Select a  room"}
-                <span>
-                  <span
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginLeft: 8,
-                    }}
-                  >
-                    {selectedRoom?.membersName
-                      ?.slice(0, 5)
-                      .map((item: any, index: number) => {
-                        const colors = [
-                          "#FF6B6B",
-                          "#4ECDC4",
-                          "#FFD93D",
-                          "#6A4C93",
-                          "#1A535C",
-                          "#FF9F1C",
-                        ];
-                        const bgColor = colors[index % colors.length];
-
-                        return (
-                          <Avatar
-                            key={index}
-                            style={{
-                              backgroundColor: bgColor,
-                              border: "2px solid white",
-                              marginLeft: index === 0 ? 0 : -10,
-                              zIndex: selectedRoom.membersName.length - index,
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {item?.charAt(0).toUpperCase()}
-                          </Avatar>
-                        );
-                      })}
-                    {selectedRoom?.membersName?.length > 5 && (
-                      <Avatar
-                        style={{
-                          backgroundColor: "#ccc",
-                          marginLeft: -10,
-                          fontSize: 12,
-                          fontWeight: "bold",
-                          border: "2px solid white",
-                        }}
-                      >
-                        +{selectedRoom.membersName.length - 5}
-                      </Avatar>
-                    )}
-                  </span>
-                </span>
-              </Title>
-              <Text type="secondary">
-                <span> {selectedRoom?.membersName?.length ?? 0} members </span>
-                {selectedRoom?.description && (
-                  <span>- {selectedRoom.description}</span>
-                )}
-              </Text>
-            </div>
+            <Space
+              size="middle"
+              style={{ cursor: "pointer" }}
+              onClick={() => setShowMembers((prev) => !prev)}
+            >
+              {selectedRoom && (
+                <>
+              { selectedRoom?.roomImage ? (
+                <img
+                  src={selectedRoom?.roomImage}
+                  alt="Room"
+                  style={{
+                    width: "35px",
+                    height: "35px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <Avatar
+                  size={40}
+                  style={{
+                    backgroundColor: "#fff",
+                    color: "#1D3557",
+                    fontWeight: "500",
+                    border: "2px solid #E0EAFC",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  }}
+                >
+                  {selectedRoom?.name?.charAt(0).toUpperCase()}
+                </Avatar>
+              )}
+              </>
+            )}
+              <Space direction="vertical" size={-4}>
+                <Title level={4} style={{ margin: 0, lineHeight: 1 }}>
+                  {selectedRoom?.name || "Select a room"}
+                </Title>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {selectedRoom?.description && (
+                    <span> {selectedRoom.description}</span>
+                  )}
+                </Text>
+              </Space>
+            </Space>
             <Dropdown
               menu={{ items, onClick: handleMenuClick }}
               placement="bottomRight"
@@ -472,12 +607,159 @@ const SidebarLayout: React.FC = () => {
                 <ChatCompent
                   selectedRoom={selectedRoom}
                   connection={connection}
+                  showMembers={showMembers}
                 />
               )}
             </div>
           </Content>
         </Layout>
+        {showMembers && (
+          <div
+            style={{
+              width: "300px",
+              borderLeft: "2px solid #D5E1F0",
+              padding: "20px",
+              background: "linear-gradient(180deg, #E8F0F8, #F8FAFF)",
+              overflowY: "auto",
+            }}
+          >
+            <Title level={5} style={{ color: "#1D3557", marginBottom: "20px" }}>
+              Participants
+            </Title>
+            {selectedRoom?.membersName?.map((name: string, index: number) => {
+              // Logic for dynamic avatar color (for variety)
+              const avatarColors = [
+                "#2A9D8F",
+                "#E9C46A",
+                "#F4A261",
+                "#E76F51",
+                "#52A9C6",
+              ];
+              const randomColor = avatarColors[index % avatarColors.length];
+
+              const isCurrentUser = name === userInfo?.name;
+              return (
+                <div
+                  key={index}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: 12,
+                    padding: "10px 14px",
+                    borderRadius: 20,
+                    background: isCurrentUser
+                      ? "linear-gradient(90deg, #FFFFFF, #E0EAFC)"
+                      : "#FFFFFF",
+                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.08)",
+                    fontWeight: 600,
+                    color: "#333",
+                    position: "relative",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    transform: "scale(1)",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "scale(1.02)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
+                >
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <Avatar
+                      style={{
+                        backgroundColor: randomColor,
+                        marginRight: 12,
+                        boxShadow: `0 2px 4px ${randomColor + "66"}`,
+                      }}
+                    >
+                      {name.charAt(0).toUpperCase()}
+                    </Avatar>
+                    {name}
+                  </div>
+                  {isCurrentUser && (
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        padding: "2px 8px",
+                        borderRadius: "10px",
+                        backgroundColor: "#2A9D8F",
+                        color: "#fff",
+                        fontWeight: "normal",
+                      }}
+                    >
+                      You
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+
+            <div
+              style={{
+                marginTop: "30px",
+                paddingTop: "20px",
+                borderTop: "2px dashed #E0EAFC",
+              }}
+            >
+              <Title
+                level={5}
+                style={{ color: "#1D3557", marginBottom: "15px" }}
+              >
+                Room Details
+              </Title>
+              <div
+                style={{
+                  fontSize: "14px",
+                  color: "#4A5568",
+                  lineHeight: "1.8",
+                }}
+              >
+                <div style={{ marginBottom: "12px" }}>
+                  <p style={{ margin: "0", fontWeight: 600, color: "#333" }}>
+                    Room Name:
+                  </p>
+                  <p style={{ margin: "4px 0 0", color: "#666" }}>
+                    {selectedRoom?.name}
+                  </p>
+                </div>
+                <div style={{ marginBottom: "12px" }}>
+                  <p style={{ margin: "0", fontWeight: 600, color: "#333" }}>
+                    Created By:
+                  </p>
+                  <p style={{ margin: "4px 0 0", color: "#666" }}>
+                    {selectedRoom?.createdBy}
+                  </p>
+                </div>
+                <div style={{ marginBottom: "12px" }}>
+                  <p style={{ margin: "0", fontWeight: 600, color: "#333" }}>
+                    Members:
+                  </p>
+                  <p style={{ margin: "4px 0 0", color: "#666" }}>
+                    {selectedRoom?.membersName?.length}
+                  </p>
+                </div>
+                <div>
+                  <p style={{ margin: "0", fontWeight: 600, color: "#333" }}>
+                    Description:
+                  </p>
+                  <p
+                    style={{
+                      margin: "4px 0 0",
+                      color: "#666",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {selectedRoom?.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </Layout>
+
       {previewModal && (
         <PreviewRoomModal
           onClose={() => setPreviewModal(false)}

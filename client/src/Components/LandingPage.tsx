@@ -87,7 +87,7 @@ const LandingPage = () => {
       title: "For Communities",
       description:
         "Join public chat rooms, discover new people, and have meaningful conversations with interactive features and emoji reactions.",
-      image: "GroupChat-amico.png",
+      image: "GroupChat-amico.svg",
     },
   };
   return (
@@ -102,25 +102,25 @@ const LandingPage = () => {
           alt="Illustration of user chatting"
         />
         <div className="w-50">
-          <h1 className="text-gradient-animate">Real-Time Connection, Your Way.</h1>
-          <p className="fs-18 w-75">
-            Experience seamless real-time communication... Create custom chat rooms, share files, and enjoy
-            interactive features like typing indicators and emoji reactions.
+          <h1 className="">Real-Time Connection, Your Way.</h1>
+        
+           <p className=" w-75">
+            Dive into a world where your words flow freely and your ideas come to life. Create private havens for your conversations or join vibrant public communities. With features like **real-time typing indicators** and dynamic **emoji reactions**, every interaction becomes meaningful.
           </p>
-          <div className="d-flexNoGap">
-            <button className="btn btn-dark" onClick={() => navigate("/login")}>
-            Start Chatting Now <ArrowRightOutlined className="mx-4" />
-            </button>
-            <button
+          <div>
+            <Button className="btn btn-dark mx-4 "  onClick={() => navigate("/login")}>
+          Get Started <ArrowRightOutlined className="mx-4"  />
+            </Button>
+            {/* <button
               className="btn btn-dark"
               onClick={() => navigate("/register")}
             >
               Create Your First Room <ArrowRightOutlined className="mx-4" />
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
-      <div className="logo-marquee" style={{ backgroundColor: "white" }}>
+      {/* <div className="logo-marquee" style={{ backgroundColor: "white" }}>
         <div className="logo-track">
           <img src="https://cdn-icons-png.flaticon.com/128/733/733585.png" />
           <img src="https://cdn-icons-png.flaticon.com/128/733/733547.png" />
@@ -139,17 +139,17 @@ const LandingPage = () => {
           <img src="https://cdn-icons-png.flaticon.com/128/733/733553.png" />
           <img src="https://cdn-icons-png.flaticon.com/128/733/733579.png" />
         </div>
-      </div>
+      </div> */}
       <div style={{ background: "linear-gradient(135deg, #f9f9f9, #e6ecff)", padding: "2rem 2rem" }}>
   <h1
     style={{
       textAlign: "center",
-      color: "#2D1A5B",
+      color: "#45629bff",
       fontSize: "2.5rem",
       marginBottom: "2rem",
     }}
   >
-        How Ryzo Powers Real-Time Connection
+        How HiveChat Powers Real-Time Connection
       </h1>
       <div className="d-flex">
         <div
@@ -167,14 +167,14 @@ const LandingPage = () => {
                         width="24"
                         className="mr-8"
                       />
-                      What Can Ryzo Do?
+                      What Can HiveChat Do?
                     </span>
                   }
                   variant="borderless"
                   className="custom-card"
                   style={{ backgroundColor: "#FDF1F5" }}
                 >
-                  Ryzo is a real-time messaging platform that allows you to
+                  HiveChat is a real-time messaging platform that allows you to
                   create and join custom chat rooms for public or private
                   conversations with advanced features like file sharing and
                   typing indicators.
@@ -248,7 +248,7 @@ const LandingPage = () => {
                   className="custom-card"
                   style={{ backgroundColor: "#FFF1E6" }}
                 >
-                  Unlike bloated chat tools, Ryzo offers flexibility and
+                  Unlike bloated chat tools, HiveChat offers flexibility and
                   simplicity. Create custom chat spaces tailored to your needs
                   with real-time features that enhance your communication
                   experience.
@@ -262,8 +262,8 @@ const LandingPage = () => {
       </div>
       
     <div style={{ backgroundColor: "#F9F9F9", padding: "3rem 0.5rem" }}>
-      <h2 className="text-center" style={{ color: "#2D1A5B", fontSize: "32px", fontWeight: "700" }}>
-        Ryzo Features at a Glance
+      <h2 className="text-center" style={{ color: "#45629bff", fontSize: "32px", fontWeight: "700" }}>
+        HiveChat Features at a Glance
       </h2>
 
       <Row gutter={[24, 24]} justify="center" className="">
@@ -289,7 +289,7 @@ const LandingPage = () => {
               }}
             >
               <img src={feature.icon} width={40} alt={feature.title} style={{ marginBottom: "1rem" }} />
-              <div style={{ fontWeight: 600, fontSize: "16px", color: "#2D1A5B" }}>{feature.title}</div>
+              <div style={{ fontWeight: 600, fontSize: "16px", color: "#45629bff" }}>{feature.title}</div>
             </div>
           </Col>
         ))}
@@ -306,17 +306,17 @@ const LandingPage = () => {
           style={{ borderRadius: "12px" }}
         />
         <div style={{ width: "50%", paddingLeft: "2rem" }}>
-        <h2 style={{  color:'#2D1A5B',fontSize:'2rem'}} className="d-center">
-       <img src='Logo.png' width={40} className="mr-8"/> Ryzo: Your Space, Your Rules
+        <h2 style={{  color:'#45629bff',fontSize:'2rem'}} className="d-center">
+       <img src='/HiveChatLogo.png' width={41.8} className="mr-8"/> HiveChat: Your Space, Your Rules
       </h2>
       <div className="d-flex" style={{ justifyContent: 'start',marginTop:'1rem' }}>
   <Button
     onClick={() => setActiveTab("teams")}
     style={{
       marginRight: "1rem",
-      backgroundColor: activeTab === "teams" ? "#2D1A5B" : "#fff",
-      color: activeTab === "teams" ? "#fff" : "#2D1A5B",
-      border: `1px solid ${activeTab === "teams" ? "#2D1A5B" : "#ccc"}`,
+      backgroundColor: activeTab === "teams" ? "#45629bff" : "#fff",
+      color: activeTab === "teams" ? "#fff" : "#45629bff",
+      border: `1px solid ${activeTab === "teams" ? "#45629bff" : "#ccc"}`,
       transition: "all 0.3s ease",
     }}
   >
@@ -325,9 +325,9 @@ const LandingPage = () => {
   <Button
     onClick={() => setActiveTab("communities")}
     style={{
-      backgroundColor: activeTab === "communities" ? "#2D1A5B" : "#fff",
-      color: activeTab === "communities" ? "#fff" : "#2D1A5B",
-      border: `1px solid ${activeTab === "communities" ? "#2D1A5B" : "#ccc"}`,
+      backgroundColor: activeTab === "communities" ? "#45629bff" : "#fff",
+      color: activeTab === "communities" ? "#fff" : "#45629bff",
+      border: `1px solid ${activeTab === "communities" ? "#45629bff" : "#ccc"}`,
       transition: "all 0.3s ease",
     }}
   >
@@ -335,13 +335,13 @@ const LandingPage = () => {
   </Button>
 </div>
 
-          <h3 style={{ fontSize: "24px", color: "#2D1A5B" }}>{content[activeTab as keyof typeof content].title}</h3>
+          <h3 style={{ fontSize: "24px", color: "#45629bff" }}>{content[activeTab as keyof typeof content].title}</h3>
           <p style={{ fontSize: "16px", color: "#555" }}>{content[activeTab as keyof typeof content].description}</p>
         </div>
       </div>
     </div>
       <div style={{ backgroundColor: "#fff", padding: "1rem 0" }}>
-        <h2 className="text-center" style={{color:'#2D1A5B'}}>
+        <h2 className="text-center" style={{color:'#45629bff'}}>
           How It Works
         </h2>
         <Row gutter={32} justify="center" style={{ padding: "2rem 5rem" }}>
@@ -389,7 +389,7 @@ const LandingPage = () => {
   <Row gutter={18} justify="center" className="px-16">
     <Col span={8}>
       <Card>
-        <p>"Ryzo made remote teamwork so easy. The typing indicators are 🔥!"</p>
+        <p>"HiveChat made remote teamwork so easy. The typing indicators are 🔥!"</p>
         <strong>- Priya, Developer</strong>
       </Card>
     </Col>

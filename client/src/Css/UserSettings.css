@@ -1,23 +1,147 @@
-.profile-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background-color: #f0f2f5;
-  padding: 16px 24px; 
-  border-radius: 12px;
-  margin-bottom: 24px;
-  position: relative;
+:root {
+  --primary-color: #45629bff;
+  --secondary-color: #8c8c8c;
+  --text-color-primary: #262626;
+  --text-color-secondary: #8c8c8c;
+  --border-color: #f0f0f0;
+  --background-color: #f5f7fa;
+  --card-background: #ffffff;
+  --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --border-radius-large: 16px;
+  --border-radius-medium: 12px;
 }
 
-.user-info {
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  color: var(--text-color-primary);
+}
+
+.user-settings-modal .ant-modal-content {
+  border-radius: var(--border-radius-large) !important;
+  padding: 0 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+.user-settings-modal .ant-modal-close {
+  z-index: 1000;
+  top: 16px;
+  right: 16px;
+  font-size: 16px;
+}
+
+.user-settings-layout {
+  background: var(--background-color);
+  border-radius: var(--border-radius-large);
+  overflow: hidden;
+  height: 600px;
+  display: flex;
+}
+
+.settings-sider {
+  background: var(--card-background);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.02);
+}
+
+.sider-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.sider-user-info {
   display: flex;
   flex-direction: column;
 }
 
+.sider-user-info .ant-typography {
+  line-height: 1.2;
+}
+
+.settings-menu {
+  flex-grow: 1;
+  border: none;
+  background: transparent;
+}
+
+.settings-menu .ant-menu-item {
+  border-radius: var(--border-radius-medium);
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  margin-top: 8px;
+  padding-left: 20px !important;
+}
+
+.settings-menu .ant-menu-item-selected {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(var(--primary-color), 0.2);
+}
+
+.settings-menu .ant-menu-item-selected .ant-menu-item-icon {
+  color: white !important;
+}
+
+.sign-out-menu {
+  margin-top: auto;
+  padding-top: 0px;
+}
+
+.sign-out-menu .ant-btn {
+  border-radius: var(--border-radius-medium);
+  text-align: left;
+  padding: 0 20px;
+}
+
+.settings-content {
+  padding: 40px;
+  background: var(--background-color);
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.content-section {
+  padding: 0;
+}
+
+.setting-card {
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-light);
+  padding: 24px;
+}
+
+.profile-card {
+  border: none;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 24px;
+}
+
+.edit-profile-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Room Cards */
 .room-card {
-  border-radius: 16px !important;
+  border-radius: var(--border-radius-large) !important;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08) !important;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
 }
 
 .room-card:hover {
@@ -25,91 +149,94 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
 }
 
-.room-card .ant-card-head {
-  border-bottom: none;
-  padding: 0 24px;
+.room-card .ant-card-body {
+  padding: 16px !important;
 }
 
-.room-card .ant-card-body {
-  padding-top: 0;
+.room-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.room-privacy-icon .anticon {
+  font-size: 24px;
+}
+
+.room-description {
+  display: block;
+  margin-top: 8px;
+  min-height: 40px;
+}
+
+.room-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
 }
 
 /* Scrollbar styling for a cleaner look */
+.settings-content::-webkit-scrollbar,
 .room-list-container::-webkit-scrollbar {
   width: 8px;
 }
 
+.settings-content::-webkit-scrollbar-track,
 .room-list-container::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 10px;
 }
 
+.settings-content::-webkit-scrollbar-thumb,
 .room-list-container::-webkit-scrollbar-thumb {
-  background: #888;
+  background: #c1c1c1;
   border-radius: 10px;
 }
 
+.settings-content::-webkit-scrollbar-thumb:hover,
 .room-list-container::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #a8a8a8;
 }
 
-.user-settings-layout {
-  background: #f0f2f5;
-  border-radius: 16px;
-  overflow: hidden; /* This is important to contain the rounded corners */
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
 }
 
-.settings-sider {
-  background: #fff;
-  padding: 16px;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.dropdown-action-item {
   display: flex;
-  flex-direction: column; /* Use flexbox to position the menu items */
-}
-
-.settings-menu {
-  flex-grow: 1; /* Make the menu grow to fill the available space */
-  border: none;
-  background: none;
-}
-
-.settings-menu .ant-menu-item,
-.settings-menu .ant-menu-submenu-title {
-  border-radius: 8px; /* Add rounded corners to menu items */
+  align-items: center;
+  gap: 8px;
+  color: var(--text-color-primary);
   font-weight: 500;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease;
 }
 
-.settings-menu .ant-menu-item:hover {
-  background-color: #f0f2f5 !important;
-  color: #1890ff !important;
+.dropdown-action-item .anticon {
+  font-size: 16px;
 }
 
-.settings-menu .ant-menu-item-selected {
-  background-color: #e6f7ff !important; /* Lighter blue for active state */
-  color: #1890ff !important;
-  font-weight: 600;
+.dropdown-action-item:hover {
+  color: var(--primary-color);
 }
 
-.sign-out-menu .ant-menu-item {
-  color: #ff4d4f !important; /* Red for danger action */
-  background-color: #fff1f0 !important;
-  border-radius: 8px;
+.dropdown-action-item.danger {
+  color: #ff4d4f;
 }
 
-.sign-out-menu .ant-menu-item:hover {
-  background-color: #ffccc7 !important;
+.dropdown-action-item.danger:hover {
+  color: #cf1322;
 }
-
-.sign-out-menu .ant-menu-item-selected {
-  background-color: #fff1f0 !important;
-}
-
-.settings-content {
-  /* padding: 24px 40px; */
-  background: #fff;
-}
-
-.ant-menu-light.ant-menu-root.ant-menu-inline{
-border-inline-end-width: 0px;
-}
-

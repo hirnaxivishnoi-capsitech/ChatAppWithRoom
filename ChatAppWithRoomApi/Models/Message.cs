@@ -21,6 +21,9 @@ namespace ChatAppWithRoomApi.Models
         [BsonIgnoreIfNull]
         public string? FileUrl { get; set; }
 
+
+        public string? FileName { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsDeleted { get; set; } = false;
@@ -33,5 +36,6 @@ public enum MessageType
     Undefined,
     Text,
     Image,
-    File
+    File,
+    System
 }

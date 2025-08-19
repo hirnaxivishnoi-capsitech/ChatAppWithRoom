@@ -24,6 +24,10 @@ namespace ChatAppWithRoomApi.Models
         public List<IDNameModel>? Members { get; set; } = new List<IDNameModel>();
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public bool isDeleted { get; set; } = false;
+
+        public string? RoomImage { get; set; } 
     }
 
    

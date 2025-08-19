@@ -1,4 +1,4 @@
-.ryzo-room-modal .room-type-toggle {
+.hivechat-room-modal .room-type-toggle {
   display: flex;
   justify-content: space-between;
   gap: 16px;
@@ -21,7 +21,7 @@
 
 .room-type-option .publicIcon {
   font-size: 22px;
-  color: #1677ff;
+  color: #2c86e1;
 }
 .room-type-option .privateIcon {
   font-size: 22px;
@@ -30,13 +30,13 @@
 
 .room-type-option.activePublic {
   background-color: #e6f4ff;
-  border: 2px solid #1677ff;
+  border: 2px solid #E9F1F9;
   box-shadow: 0px 4px 12px rgba(22, 119, 255, 0.2);
 }
 
 .room-type-option.activePublic {
   background-color: #e6f4ff;
-  border: 2px solid #1677ff;
+  border: 2px solid #2c86e1;
   box-shadow: 0px 4px 12px rgba(22, 119, 255, 0.2);
 }
 

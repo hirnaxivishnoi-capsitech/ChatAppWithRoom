@@ -1,12 +1,14 @@
 ﻿using ChatAppWithRoomApi.DTO;
 using ChatAppWithRoomApi.Models;
 using ChatAppWithRoomApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatAppWithRoomApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UserController : ControllerBase
 
     {

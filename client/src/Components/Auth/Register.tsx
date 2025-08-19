@@ -31,7 +31,7 @@ const Register = () => {
         .then((res: any) => {
           if (res?.status) {
             api.success({ message: res?.message });
-            setTimeout(()=>navigate('/login'),2000);
+            setTimeout(() => navigate("/login"), 2000);
           } else {
             api.error({ message: res?.message });
           }
@@ -59,7 +59,8 @@ const Register = () => {
     <>
       {contextHolder}
       <Header />
-      <div className="register-container">
+      <div   className="d-flex"
+        style={{ justifyContent: "center", marginTop: 30 }}>
         <Card
           className="register-card"
           // title={
@@ -69,12 +70,12 @@ const Register = () => {
           //   </div>
           // }
         >
-          <div className="d-flex">
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
             {/* Left Section - Form */}
-            <div style={{ width: "500px" }}>
+            <div style={{ flex: 1 }}>
               <Title
                 level={3}
-                style={{ color: "#2D1A5B", marginBottom: 0 }}
+                style={{ color: "#45629bff", marginBottom: 0 }}
                 // className="d-center"
               >
                 {/* <img
@@ -90,7 +91,7 @@ const Register = () => {
               </Text>
 
               <Form
-                {...formItemLayout}
+                // {...formItemLayout}
                 name="register"
                 // scrollToFirstError
                 form={form}
@@ -100,6 +101,24 @@ const Register = () => {
                 onFinish={onFinish}
                 // onFinishFailed={onFinishFailed}
               >
+                    <Form.Item
+                  name="name"
+                  label="Name"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your name!",
+                      whitespace: true,
+                    },
+                  ]}
+                >
+                  <Input
+                    size="large"
+                    prefix={<UserOutlined />}
+                    placeholder="Enter your name"
+                    className="gray"
+                  />
+                </Form.Item>
                 <Form.Item
                   name="email"
                   label="E-mail"
@@ -164,30 +183,19 @@ const Register = () => {
                   />
                 </Form.Item> */}
 
-                <Form.Item
-                  name="name"
-                  label="Name"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input your name!",
-                      whitespace: true,
-                    },
-                  ]}
-                >
-                  <Input
-                    size="large"
-                    prefix={<UserOutlined />}
-                    placeholder="Enter your name"
-                    className="gray"
-                  />
-                </Form.Item>
+            
 
                 <Form.Item>
                   <Button
-                    type="primary"
+                    // type="primary"
                     htmlType="submit"
-                    className="register-button"
+                    size="large"
+                    block
+                    className="btn btn-dark mx-4"
+                    // style={{
+                    //   backgroundColor: "#2D1A5B",
+                    //   borderColor: "#2D1A5B",
+                    // }}
                   >
                     Register
                   </Button>
@@ -198,7 +206,7 @@ const Register = () => {
                     onClick={() => navigate("/login")}
                     style={{
                       textDecoration: "underline",
-                      color: "#2D1A5B",
+                      color: "#45629bff",
                       cursor: "pointer",
                     }}
                   >
@@ -211,15 +219,19 @@ const Register = () => {
             {/* Right Section - Image */}
             <div
               style={{
+                flex: 1,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                padding: 20,
+                borderTopRightRadius: 12,
+                borderBottomRightRadius: 12,
               }}
             >
               <img
-                src="5516.png"
+                src="/Signup-amico.png"
                 alt="Login Illustration"
-                style={{ width: "100%", maxWidth: "400px" }}
+                style={{ width: "100%" }}
               />
             </div>
           </div>

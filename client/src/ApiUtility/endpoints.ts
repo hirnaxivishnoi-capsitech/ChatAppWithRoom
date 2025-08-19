@@ -20,5 +20,6 @@ export const endpoints = {
   message:{
     createMessage:`${BASE_URL}/Message/CreateMessage`,
     getMessagesByRoomId:`${BASE_URL}/Message/GetMessagesByRoomId`,
+    uploadFime:`${BASE_URL}/Message/UploadFile`
   }
 };

@@ -10,7 +10,7 @@
   width: 900px;
   height: auto;
   padding: 20px;
-  background-color: #f2f2fd;
+  background-color: #E8F0F8;
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
@@ -45,8 +45,6 @@
   margin-left: 5px;
 }
 
-.register-button {
-  background-color: #2d1a5b;
-  border-color: #2d1a5b;
-  width: 100%;
+.ant-input-affix-wrapper >input.ant-input{
+  color: black;
 }

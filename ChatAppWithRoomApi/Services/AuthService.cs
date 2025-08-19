@@ -55,7 +55,7 @@ namespace ChatAppWithRoomApi.Services
                 issuer: _configuration["JWT:Issuer"],
                 audience: _configuration["JWT:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(1),
+                expires: DateTime.Now.AddHours(12),
                 signingCredentials: credentials
                 );
 

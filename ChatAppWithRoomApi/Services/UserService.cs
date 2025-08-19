@@ -90,5 +90,15 @@ namespace ChatAppWithRoomApi.Services
 
         public async Task DeleteAsync(string id) =>
             await _userCollection.DeleteOneAsync(x => x.Id == id);
+
+     
+        public async Task UpdateOnlineStatus(string userId, bool isOnline)
+        {
+            var update = Builders<User>.Update
+                .Set(x => x.IsOnline, isOnline)
+                .Set(x => x.LastActiveAt, DateTime.UtcNow);
+
+            await _userCollection.UpdateOneAsync(x => x.Id == userId, update);
+        }
     }
 }

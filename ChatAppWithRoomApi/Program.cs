@@ -10,12 +10,15 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<DatabaseSetting>(
     builder.Configuration.GetSection("DatabaseSettings"));
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("CloudinarySettings")
+    );
 
-// Add services to the container.
 builder.Services.AddSingleton<AuthService>();
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<RoomServices>();
 builder.Services.AddSingleton<MessageService>();
+builder.Services.AddScoped<ICloudinaryService,CloudinaryService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -75,18 +78,18 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173") // <-- your frontend
+            policy.WithOrigins("http://localhost:5173", "https://localhost:7004") 
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
 });
 
-builder.Services.AddSignalR(); // Add SignalR service
+builder.Services.AddSignalR(); 
 
 var app = builder.Build();
 
-app.MapHub<ChatHub>("/chatHub"); // Map the Hub - This is where your frontend will connect
+app.MapHub<ChatHub>("/chatHub"); 
 
 
 // Configure the HTTP request pipeline.

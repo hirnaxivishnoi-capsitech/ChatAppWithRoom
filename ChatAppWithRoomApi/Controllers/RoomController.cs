@@ -4,6 +4,7 @@ using ChatAppWithRoomApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Win32;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Security.Cryptography.X509Certificates;
@@ -20,66 +21,76 @@ namespace ChatAppWithRoomApi.Controllers
 
         private readonly UserService _userService;
 
-        public RoomController(RoomServices roomService, UserService userService)
+        private readonly ICloudinaryService _cloudinaryService;
+
+        public RoomController(RoomServices roomService, UserService userService, ICloudinaryService cloudinaryService)
         {
             _roomService = roomService;
             _userService = userService;
+            _cloudinaryService = cloudinaryService;
         }
 
-        [HttpPost("CreateRoom")]
 
-        public async Task<ActionResult<ApiResponse<Room>>> CreateRoom([FromBody] Room room)
+        [HttpPost("CreateRoom")]
+        public async Task<ActionResult<ApiResponse<Room>>> CreateRoom([FromForm] RoomCreationDto room)
         {
             var res = new ApiResponse<Room>();
 
-          
-
             try
             {
-                var roomExist = await _roomService.GetIfExistRoomAysnc(room.Name, room.IsPrivate);
-
-                if(roomExist != null)
+                var roomExist = await _roomService.GetIfExistRoomAysnc(room.Name, (bool)room.IsPrivate);
+                if (roomExist != null)
                 {
                     res.Status = false;
-                    res.Message = "Room already exist";
+                    res.Message = "Room already exists";
                     return res;
                 }
 
-                if (room.CreatedBy == null || string.IsNullOrEmpty(room.CreatedBy.Id))
-                {
-                    return BadRequest("The creator's user ID is required to create a room.");
-                }
+                if (string.IsNullOrEmpty(room.UserId))
+                    return BadRequest("The creator's user ID is required.");
 
-                var creator = await _userService.GetUserById(room.CreatedBy.Id);
-
+                var creator = await _userService.GetUserById(room.UserId);
                 if (creator == null)
-                {
                     return NotFound("The specified creator could not be found");
+
+                string hashedPassword = null;
+                if ((bool)room.IsPrivate)
+                {
+                    if (string.IsNullOrEmpty(room.Password))
+                        return BadRequest("A password is required to create a private room.");
+
+                    hashedPassword = BCrypt.Net.BCrypt.EnhancedHashPassword(room.Password, 13);
                 }
 
-                if(room.IsPrivate)
+                string imageUrl = null;
+                if (room.RoomImage != null)
                 {
-                    if(String.IsNullOrEmpty(room.Password)){
+                    imageUrl = await _cloudinaryService.UploadFileAsync(room.RoomImage);
+                }
 
-                        return BadRequest("A password is required to create a private room.");
-                    } 
+                var createRoom = new Room
+                {
+                    Name = room.Name,
+                    IsPrivate = (bool)room.IsPrivate,
+                    Password = hashedPassword,
+                    Description = room.Description,
+                    CreatedBy = new IDNameModel { Id = creator.Id, Name = creator.Name },
+                    Members = new List<IDNameModel> { new IDNameModel { Id = creator.Id, Name = creator.Name } },
+                    RoomImage= imageUrl
                 };
 
-                room.CreatedBy.Id = creator.Id;
-                room.CreatedBy.Name = creator.Name;
+                var createdRoom = await _roomService.CreateRoomAsync(createRoom);
 
-                var createdRoom = await _roomService.CreateRoomAsync(room);
-
+                res.Status = true;
                 res.Result = createdRoom;
-
-                res.Message = " The room has been created successfully";
-                return Ok(res);
-
-
-            }catch(Exception ex)
+                res.Message = "Room has been created successfully";
+                return res;
+            }
+            catch (Exception ex)
             {
-                res.Message = "An error occurred while creating the room.";
-                return StatusCode(500, res);
+                res.Status = false;
+                res.Message = $"An error occurred while creating the room. {ex.Message}";
+                return res;
             }
         }
 
@@ -170,18 +181,25 @@ namespace ChatAppWithRoomApi.Controllers
                         res.Result = null;
                         return res;
                     }
-                    if (roomExist.Password != joinRoom.Password) 
+                   
+                    var Verify = BCrypt.Net.BCrypt.EnhancedVerify(joinRoom.Password, roomExist.Password);
+
+                    if (!Verify)
                     {
+
                         res.Status = false;
                         res.Message = "The password provided is incorrect.";
                         res.Result = null;
                         return res;
-                        
+                       
                     }
+                   
                 }
-               var updatedRoom = await _roomService.AddUserToRoom(joinRoom.RoomId, joinRoom.UserId,joinRoom.UserName);
+
+                var updatedRoom = await _roomService.AddUserToRoom(joinRoom.RoomId, joinRoom.UserId, joinRoom.UserName);
                 res.Result = updatedRoom;
                 res.Message = "Joined room Successfully";
+
                 return Ok(res);
 
             }catch(Exception ex)
@@ -281,7 +299,7 @@ namespace ChatAppWithRoomApi.Controllers
                     return res;
                 }
 
-                await _roomService.DeleteAsync(deleteRoomDto.roomId);
+                await _roomService.SoftDelete(deleteRoomDto.roomId);
                 res.Message = "Room deleted successfully.";
                 res.Result= true;
                 
@@ -299,5 +317,6 @@ namespace ChatAppWithRoomApi.Controllers
             return res;
 
         }
+    
     }
 }
