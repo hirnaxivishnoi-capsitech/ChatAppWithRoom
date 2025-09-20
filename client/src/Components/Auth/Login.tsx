@@ -1,17 +1,10 @@
 import React, { useEffect } from "react";
-import {
-  Button,
-  Form,
-  Input,
-  Card,
-  Typography,
-  notification,
-} from "antd";
+import { Button, Form, Input, Card, Typography, notification } from "antd";
 import { useNavigate } from "react-router-dom";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import Header from "../Header";
 import { useLogin } from "../../Services/loginService";
-
+import { ProForm, ProFormText } from "@ant-design/pro-components";
 const { Title, Text } = Typography;
 
 const Login = () => {
@@ -22,33 +15,31 @@ const Login = () => {
   const loginMutate = useLogin();
   const [api, contextHolder] = notification.useNotification();
 
-  
   useEffect(() => {
     if (Id && jwtToken) {
       navigate("/hivechat/");
     }
   }, []);
 
- const onFinish = (values: any) => {
-  loginMutate
-    .mutateAsync(values)
-    .then((res: any) => {
-      if (res?.status) {
-        api.success({ message: res?.message });
-      } else {
-        api.error({ message: res?.message });
-      }
-    })
-    .catch((error: any) => {
-      api.error({
-        message: error?.response?.data?.message || "Something went wrong",
+  const onFinish = (values: any) => {
+    loginMutate
+      .mutateAsync(values)
+      .then((res: any) => {
+        if (res?.status) {
+          api.success({ message: res?.message });
+        } else {
+          api.error({ message: res?.message });
+        }
+      })
+      .catch((error: any) => {
+        api.error({
+          message: error?.response?.data?.message || "Something went wrong",
+        });
+      })
+      .finally(() => {
+        form.resetFields();
       });
-    })
-    .finally(() => {
-      form.resetFields();
-    });
-};
-
+  };
 
   return (
     <>
@@ -78,7 +69,7 @@ const Login = () => {
                 Login to your HiveChat account
               </Text>
 
-              <Form
+              {/* <Form
                 form={form}
                 layout="vertical"
                 style={{ marginTop: 30 }}
@@ -143,7 +134,63 @@ const Login = () => {
                     Create an account
                   </span>
                 </Text>
-              </Form>
+              </Form> */}
+              <ProForm
+              style={{ marginTop: 20 }}
+              form={form}
+                submitter={{
+                  resetButtonProps: false,
+                  searchConfig: {
+                    submitText: "Login",
+                  },
+                  submitButtonProps: {
+                    size: "large",
+                    className: "btn btn-dark mx-4",
+                    block: true,
+                  },
+                }}
+                onFinish={onFinish}
+              >
+                <ProFormText
+                  label="Email"
+                  name="email"
+                  placeholder={"Enter your email"}
+                  fieldProps={{
+                    size: "large",
+                    prefix: <MailOutlined />,
+                  }}
+                  rules={[
+                    { required: true, message: "Please input your email!" },
+                  ]}
+                />
+
+                <ProFormText.Password
+                  name="password"
+                  label="Password"
+                  placeholder="Enter password"
+                  fieldProps={{
+                    size: "large",
+                    prefix: <LockOutlined />,
+                  }}
+                  rules={[
+                    { required: true, message: "Please enter your password" },
+                  ]}
+                />
+                
+              </ProForm>
+              <Text type="secondary" style={{ display: "block", marginTop: 14 }}>
+                  New to HiveChat?{" "}
+                  <span
+                    onClick={() => navigate("/register")}
+                    style={{
+                      textDecoration: "underline",
+                      color: "#45629bff",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Create an account
+                  </span>
+                </Text>
             </div>
 
             {/* Right Section - Image */}

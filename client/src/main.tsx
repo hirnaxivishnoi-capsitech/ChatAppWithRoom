@@ -17,12 +17,12 @@ export const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-     <Provider store={store}>
-          <PersistGate loading={null} persistor={persistor}>
-             <QueryClientProvider client={queryClient}>
-            <App />
-            </QueryClientProvider>
-          </PersistGate>
-        </Provider>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </PersistGate>
+    </Provider>
   </StrictMode>,
 )

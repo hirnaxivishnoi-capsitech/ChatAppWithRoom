@@ -168,14 +168,14 @@ const SidebarLayout: React.FC = () => {
       setSelectedRoom(YourRooms[0]);
     }
 
-    if (searchRoom) {
-      setSelectedRoom(
-        YourRooms?.find((room: any) =>
-          room.name.toLowerCase().includes(searchRoom.toLowerCase())
-        ) || null
-      );
-    }
-  }, [searchRoom, YourRooms, selectedRoom]);
+    // if (searchRoom) {
+    //   setSelectedRoom(
+    //     YourRooms?.find((room: any) =>
+    //       room.name.toLowerCase().includes(searchRoom.toLowerCase())
+    //     ) || null
+    //   );
+    // }
+  }, [ YourRooms, selectedRoom]);
 
   console.log("Rooms", YourRooms);
 
