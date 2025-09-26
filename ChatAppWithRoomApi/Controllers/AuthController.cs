@@ -32,8 +32,15 @@ namespace ChatAppWithRoomApi.Controllers
 
                     var token = _authService.generateJWTToken(user);
                     var refreshToken = _authService.generateRefreshToken();
+
+                    //user.RefreshToken = refreshToken;
+                    // user.RefreshTimeExpiryTime = DateTime.Now.AddDays(12);
+
+                    await _userService.UpdatedRefreshToken(user.Id, refreshToken);
+
+                    //  await _userService.UpdateAsync(user);
+
                     res.Result = new AuthResponse { Email = user.Email,   Token = token , RefreshToken = refreshToken,Name = user.Name , Id = user.Id };
-                    // res.Message = "Login Successful";
                     res.Message = "Login  Successful";
                     return res;
                 }
@@ -90,9 +97,9 @@ namespace ChatAppWithRoomApi.Controllers
 
         [HttpPost("refreshToken")]
 
-        public async Task<ApiResponse<bool>> RefreshToken(string refershToken)
+        public async Task<ApiResponse<AuthResponse>> RefreshToken(string refershToken)
         {
-            ApiResponse<bool> response = new ApiResponse<bool>();
+            ApiResponse<AuthResponse> response = new ApiResponse<AuthResponse>();
 
             try
             { 
@@ -105,12 +112,13 @@ namespace ChatAppWithRoomApi.Controllers
                 }
 
                 var token = _authService.generateJWTToken(user);
-                var refreshToken = _authService.generateRefreshToken();
+                var generateRefreshToken = _authService.generateRefreshToken();
 
-                var update = await _userService.UpdatedRefreshToken(user.Id, refreshToken);
+                await _userService.UpdatedRefreshToken(user.Id, generateRefreshToken);
 
-                
-
+                response.Result = new AuthResponse { Email = user.Email, Token = token, RefreshToken = generateRefreshToken, Name = user.Name, Id = user.Id };
+                response.Message = "Token refreshed successfully";
+                response.Status = true;
             }
             catch(Exception ex)
             {

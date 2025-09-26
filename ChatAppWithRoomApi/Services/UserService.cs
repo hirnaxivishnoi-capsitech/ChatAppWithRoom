@@ -130,7 +130,7 @@ namespace ChatAppWithRoomApi.Services
                 throw new Exception("No user found");
             }
 
-           var update = Builders<User>.Update.Set(x => x.RefreshToken, newRefreshToken);
+           var update = Builders<User>.Update.Set(x => x.RefreshToken, newRefreshToken).Set(x =>x.RefreshTimeExpiryTime,DateTime.Now.AddDays(12));
 
             var updUser = await _userCollection.UpdateOneAsync(x => x.Id == userId, update);
 
