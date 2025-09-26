@@ -29,10 +29,12 @@ namespace ChatAppWithRoomApi.Controllers
                 var user = await _userService.GetUserByEmailAndPassword(loginUser.Email, loginUser.Password);
                 if (user != null)
                 {
+
                     var token = _authService.generateJWTToken(user);
                     var refreshToken = _authService.generateRefreshToken();
                     res.Result = new AuthResponse { Email = user.Email,   Token = token , RefreshToken = refreshToken,Name = user.Name , Id = user.Id };
-                    res.Message = "Login Successful";
+                    // res.Message = "Login Successful";
+                    res.Message = "Login  Successful";
                     return res;
                 }
                 res.Status = false;
