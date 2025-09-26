@@ -8,6 +8,7 @@ export const endpoints = {
   users: {
     getUserById : `${BASE_URL}/User`,
     updateUser : `${BASE_URL}/User`,
+    changePassword : `${BASE_URL}/User/ChangePassword`
   },
   rooms :{
     createRoom: `${BASE_URL}/Room/CreateRoom`,

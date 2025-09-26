@@ -29,6 +29,7 @@ import {
   EditOutlined,
   UsergroupAddOutlined,
   HistoryOutlined,
+  SecurityScanOutlined,
 } from "@ant-design/icons";
 import "../../Css/UserSettings.css";
 import { useSelector } from "react-redux";
@@ -38,6 +39,7 @@ import { useDeleteRoom, useGetYourRoom } from "../../Services/RoomService";
 import dayjs from "dayjs";
 import * as signalR from "@microsoft/signalr";
 import { useGetUser, useUpdateUser } from "../../Services/UserService";
+import ChangePassword from "./ChangePassword";
 
 const { Sider, Content } = Layout;
 const { Title, Text } = Typography;
@@ -566,6 +568,9 @@ const UserSettings: React.FC<UserSettingsProps> = ({ connection }) => {
               <Menu.Item key="3" icon={<HistoryOutlined />}>
                 History
               </Menu.Item>
+              <Menu.Item key="4" icon={<SecurityScanOutlined />}>
+                Settings 
+              </Menu.Item>
             </Menu>
 
             <div className="sign-out-menu">
@@ -587,6 +592,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ connection }) => {
               {selectedMenuKey === "1" && renderProfileSection()}
               {selectedMenuKey === "2" && renderYourRoomsSection()}
               {selectedMenuKey === "3" && renderHistorySection()}
+              {selectedMenuKey === "4" && <ChangePassword/>}
             </Content>
           </Layout>
         </Layout>

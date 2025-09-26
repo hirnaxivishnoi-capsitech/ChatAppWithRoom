@@ -2,6 +2,7 @@
 using ChatAppWithRoomApi.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using System.Security.Claims;
 
 namespace ChatAppWithRoomApi.Services
 {
@@ -100,5 +101,13 @@ namespace ChatAppWithRoomApi.Services
 
             await _userCollection.UpdateOneAsync(x => x.Id == userId, update);
         }
+
+        public async Task ChangePassword(string userId ,string newPassword)
+        {
+            var changePass = Builders<User>.Update.Set(x => x.PasswordHash, newPassword);
+
+             await _userCollection.UpdateOneAsync(x => x.Id == userId, changePass);
+        }
+
     }
 }

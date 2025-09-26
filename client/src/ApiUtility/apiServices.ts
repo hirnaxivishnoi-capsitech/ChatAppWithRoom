@@ -92,3 +92,8 @@ export const uploadRoomImage = async<T>(
   return response?.data;
 
 }
+
+export const changePassword = async (url: string, data: any) => {
+  const response = await axiosInstance.post(`${url}`, data);
+  return response?.data;
+};

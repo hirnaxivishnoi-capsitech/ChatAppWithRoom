@@ -3,6 +3,7 @@ using ChatAppWithRoomApi.Models;
 using ChatAppWithRoomApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ChatAppWithRoomApi.Controllers
 {
@@ -84,5 +85,45 @@ namespace ChatAppWithRoomApi.Controllers
             return res;
         }
 
+        [HttpPost("ChangePassword")]
+
+        public async Task<ApiResponse<bool>> ChangePassword(ChangePassword changePassword)
+        {
+            var res = new ApiResponse<bool>();
+
+            try {
+            
+              //  var userId = HttpContent
+              var userId = HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+              
+                if(userId == null)
+                {
+                    res.Result=false;
+                    res.Message = "User is required";
+                }
+
+                var userInfo = await _userService.GetUserById(userId);
+
+               var verfiy = BCrypt.Net.BCrypt.EnhancedVerify(changePassword.OldPassword,userInfo.PasswordHash);
+
+                if (verfiy)
+                {
+                 var HashNewPassword =  BCrypt.Net.BCrypt.EnhancedHashPassword(changePassword.NewPassword, 13);
+
+                    await _userService.ChangePassword(userId, HashNewPassword);
+                    res.Result = true;
+                    res.Message = "Password changed successfully";
+
+                }
+
+
+
+            } catch(Exception ex) { 
+            res.Message = ex.Message;
+            res.Status = false;
+            }
+            return res;
+        }
+    
     }
 }
