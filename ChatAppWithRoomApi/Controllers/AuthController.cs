@@ -105,8 +105,9 @@ namespace ChatAppWithRoomApi.Controllers
                 var token = _authService.generateJWTToken(user);
                 var refreshToken = _authService.generateRefreshToken();
 
-               
+                var update = await _userService.UpdatedRefreshToken(user.Id, refreshToken);
 
+                
 
             }
             catch(Exception ex)
