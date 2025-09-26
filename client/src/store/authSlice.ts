@@ -5,6 +5,7 @@ interface AuthState {
   name: string;
   email: string;
   token: string;
+  refreshToken: string; 
   id: string;
 }
 
@@ -12,6 +13,7 @@ const initialState: AuthState = {
   name: "",
   email: "",
   token: "",
+  refreshToken :"",
   id: "",
 };
 
@@ -23,6 +25,7 @@ const authSlice = createSlice({
       state.name = action.payload.name;
       state.email = action.payload.email;
       state.token = action.payload.token;
+      state.refreshToken = action.payload.refreshToken;
       state.id = action.payload.id;
     },
     

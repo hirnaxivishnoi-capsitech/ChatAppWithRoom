@@ -109,5 +109,34 @@ namespace ChatAppWithRoomApi.Services
              await _userCollection.UpdateOneAsync(x => x.Id == userId, changePass);
         }
 
+        public async Task<User> GetRefreshToken(string refershToken)
+        {
+            var user = await _userCollection.Find(x => x.RefreshToken == refershToken).FirstOrDefaultAsync();
+
+            if(user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            return user;
+        }
+
+        public async Task<User> UpdatedRefreshToken(string userId, string newRefreshToken)
+        {
+            var user = await _userCollection.Find(x => x.Id ==userId).FirstOrDefaultAsync();
+
+            if(user == null)
+            {
+                throw new Exception("No user found");
+            }
+
+           var update = Builders<User>.Update.Set(x => x.RefreshToken, newRefreshToken);
+
+            var updUser = await _userCollection.UpdateOneAsync(x => x.Id == userId, update);
+
+            return user;
+
+        }
+
     }
 }

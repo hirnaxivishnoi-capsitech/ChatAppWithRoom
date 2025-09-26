@@ -25,6 +25,10 @@ namespace ChatAppWithRoomApi.Models
         public bool IsOnline { get; set; } = false;
 
         public string Role { get; set; } = "user";
+
+        public string? RefreshToken { get; set; }
+
+        public DateTime? RefreshTimeExpiryTime {  get; set; } = DateTime.UtcNow;
     }
 
 }

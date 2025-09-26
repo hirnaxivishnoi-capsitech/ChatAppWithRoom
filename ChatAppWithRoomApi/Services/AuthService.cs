@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace ChatAppWithRoomApi.Services
@@ -64,5 +65,15 @@ namespace ChatAppWithRoomApi.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        public string generateRefreshToken()
+        {
+            var randomBytes = new byte[32];
+
+            var rng = RandomNumberGenerator.Create();
+
+            rng.GetBytes(randomBytes);
+
+            return Convert.ToBase64String(randomBytes);
+        }
     }
 }

@@ -30,7 +30,8 @@ namespace ChatAppWithRoomApi.Controllers
                 if (user != null)
                 {
                     var token = _authService.generateJWTToken(user);
-                    res.Result = new AuthResponse { Email = user.Email,   Token = token , Name = user.Name , Id = user.Id };
+                    var refreshToken = _authService.generateRefreshToken();
+                    res.Result = new AuthResponse { Email = user.Email,   Token = token , RefreshToken = refreshToken,Name = user.Name , Id = user.Id };
                     res.Message = "Login Successful";
                     return res;
                 }
@@ -85,7 +86,38 @@ namespace ChatAppWithRoomApi.Controllers
             }
         }
 
+        [HttpPost("refreshToken")]
 
+        public async Task<ApiResponse<bool>> RefreshToken(string refershToken)
+        {
+            ApiResponse<bool> response = new ApiResponse<bool>();
+
+            try
+            { 
+                var user = await _userService.GetRefreshToken(refershToken);
+
+                if(user.RefreshTimeExpiryTime > DateTime.UtcNow)
+                {
+                    response.Message = "Refresh Token Expire";
+                    response.Status = false;
+                }
+
+                var token = _authService.generateJWTToken(user);
+                var refreshToken = _authService.generateRefreshToken();
+
+               
+
+
+            }
+            catch(Exception ex)
+            {
+                response.Message = ex.Message;
+                response.Status = false;
+            }
+
+            return response;
+
+        }
 
     }
 }
