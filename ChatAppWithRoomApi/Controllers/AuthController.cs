@@ -36,7 +36,7 @@ namespace ChatAppWithRoomApi.Controllers
                     //user.RefreshToken = refreshToken;
                     // user.RefreshTimeExpiryTime = DateTime.Now.AddDays(12);
 
-                    await _userService.UpdatedRefreshToken(user.Id, refreshToken);
+                    await _userService.UpdatedRefreshTokenForLogin(user.Id, refreshToken);
 
                     //  await _userService.UpdateAsync(user);
 
@@ -115,7 +115,7 @@ namespace ChatAppWithRoomApi.Controllers
                 var token = _authService.generateJWTToken(user);
                 var generateRefreshToken = _authService.generateRefreshToken();
 
-                await _userService.UpdatedRefreshTokenForLogin(user.Id, generateRefreshToken);
+                await _userService.UpdatedRefreshToken(user.Id, generateRefreshToken);
 
                 response.Result = new AuthResponse { Email = user.Email, Token = token, RefreshToken = generateRefreshToken, Name = user.Name, Id = user.Id };
                 response.Message = "Token refreshed successfully";

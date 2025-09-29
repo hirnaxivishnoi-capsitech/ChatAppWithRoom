@@ -121,7 +121,7 @@ namespace ChatAppWithRoomApi.Services
             return user;
         }
 
-        public async Task<User> UpdatedRefreshToken(string userId, string newRefreshToken)
+        public async Task<User> UpdatedRefreshTokenForLogin(string userId, string newRefreshToken)
         {
             var user = await _userCollection.Find(x => x.Id ==userId).FirstOrDefaultAsync();
 
@@ -131,7 +131,7 @@ namespace ChatAppWithRoomApi.Services
             }
 
            var update = Builders<User>.Update.Set(x => x.RefreshToken, newRefreshToken)
-                .Set(x =>x.RefreshTimeExpiryTime,DateTime.UtcNow.AddMinutes(5));
+                .Set(x =>x.RefreshTimeExpiryTime,DateTime.UtcNow.AddDays(15));
 
             var updUser = await _userCollection.UpdateOneAsync(x => x.Id == userId, update);
 
@@ -139,7 +139,7 @@ namespace ChatAppWithRoomApi.Services
 
         }
 
-        public async Task<User> UpdatedRefreshTokenForLogin(string userId, string newRefreshToken)
+        public async Task<User> UpdatedRefreshToken(string userId, string newRefreshToken)
         {
             var user = await _userCollection.Find(x => x.Id == userId).FirstOrDefaultAsync();
 
