@@ -97,7 +97,7 @@ namespace ChatAppWithRoomApi.Controllers
 
         [HttpPost("refreshToken")]
 
-        public async Task<ApiResponse<AuthResponse>> RefreshToken(string refershToken)
+        public async Task<ApiResponse<AuthResponse>> RefreshToken([FromBody] string refershToken)
         {
             ApiResponse<AuthResponse> response = new ApiResponse<AuthResponse>();
 
@@ -105,16 +105,17 @@ namespace ChatAppWithRoomApi.Controllers
             { 
                 var user = await _userService.GetRefreshToken(refershToken);
 
-                if(user.RefreshTimeExpiryTime > DateTime.UtcNow)
+                if(user.RefreshTimeExpiryTime < DateTime.UtcNow)
                 {
                     response.Message = "Refresh Token Expire";
                     response.Status = false;
+                    return response;
                 }
 
                 var token = _authService.generateJWTToken(user);
                 var generateRefreshToken = _authService.generateRefreshToken();
 
-                await _userService.UpdatedRefreshToken(user.Id, generateRefreshToken);
+                await _userService.UpdatedRefreshTokenForLogin(user.Id, generateRefreshToken);
 
                 response.Result = new AuthResponse { Email = user.Email, Token = token, RefreshToken = generateRefreshToken, Name = user.Name, Id = user.Id };
                 response.Message = "Token refreshed successfully";

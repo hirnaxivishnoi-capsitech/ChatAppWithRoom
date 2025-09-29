@@ -130,7 +130,26 @@ namespace ChatAppWithRoomApi.Services
                 throw new Exception("No user found");
             }
 
-           var update = Builders<User>.Update.Set(x => x.RefreshToken, newRefreshToken).Set(x =>x.RefreshTimeExpiryTime,DateTime.Now.AddDays(12));
+           var update = Builders<User>.Update.Set(x => x.RefreshToken, newRefreshToken)
+                .Set(x =>x.RefreshTimeExpiryTime,DateTime.UtcNow.AddMinutes(5));
+
+            var updUser = await _userCollection.UpdateOneAsync(x => x.Id == userId, update);
+
+            return user;
+
+        }
+
+        public async Task<User> UpdatedRefreshTokenForLogin(string userId, string newRefreshToken)
+        {
+            var user = await _userCollection.Find(x => x.Id == userId).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new Exception("No user found");
+            }
+
+            var update = Builders<User>.Update.Set(x => x.RefreshToken, newRefreshToken);
+                // .Set(x => x.RefreshTimeExpiryTime, DateTime.UtcNow.AddMinutes(2));
 
             var updUser = await _userCollection.UpdateOneAsync(x => x.Id == userId, update);
 

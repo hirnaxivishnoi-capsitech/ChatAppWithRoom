@@ -42,6 +42,7 @@ const authSlice = createSlice({
 });
 
 export const token = (state: RootState): string => state?.auth?.token;
+export const refreshToken = (state: RootState): string => state?.auth?.refreshToken;
 export const userData = (state: RootState): AuthState => state?.auth;
 
 export const { setUserData, clearUserData } = authSlice.actions;

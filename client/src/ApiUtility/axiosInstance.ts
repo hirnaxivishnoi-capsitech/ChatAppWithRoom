@@ -26,15 +26,22 @@ axiosInstance.interceptors.response.use(
       // store.dispatch(clearUserData());
       // window.location.href = "/login";
 
-      axios.post(`${import.meta.env.REACT_APP_BASE_URL}/Auth/refreshToken`).then((res) => {
-        if (!res.data.response.status) {
-          store.dispatch(clearUserData());
-          window.location.href = "/login";
-        } else {
-          store.dispatch(setUserData(res.data.response.result));
-          error.config.headers.Authorization = `Bearer ${res.data.response.result.token}`
-        }
-      });
+      axios
+        .post(
+          "https://localhost:5001/api/Auth/refreshToken",
+          JSON.stringify(store.getState().auth.refreshToken),
+          { headers: { "Content-Type": "application/json" } }
+        )
+        .then((res) => {
+          console.log("refresh Token", res);
+          if (res.data.status == false) {
+            store.dispatch(clearUserData());
+            window.location.href = "/login";
+          } else {
+            store.dispatch(setUserData(res.data.result));
+            error.config.headers.Authorization = `Bearer ${res.data.result.token}`;
+          }
+        });
     }
   }
 );
